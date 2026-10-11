@@ -1,0 +1,15 @@
+rules_version = '2';
+// The owner's photos: users/{uid}/photos/{storeId}/{file}. Owner-only read and write; nobody else,
+// signed in or not, published store or not. Functions read them with the admin SDK.
+// Not used by the demo (readings come from insight packs); kept so a later photo upload starts owner-only.
+// Downscaled JPEGs only (long edge 1600 px, EXIF dropped on the device): a full-size original is refused.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{uid}/photos/{storeId}/{file} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.contentType == 'image/jpeg'
+        && request.resource.size < 2 * 1024 * 1024;
+    }
+  }
+}

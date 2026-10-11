@@ -1,0 +1,59 @@
+{
+ "_note": "Recorded plan for the INVENTED fixture creator_maya, used when no ANTHROPIC_API_KEY is set. Written to the planner's SYSTEM format and checked by planner.check (Python) and functions/src/planner.js check (JS).",
+ "store": {
+  "name": "Tide & Clay",
+  "tagline": "Slow mornings, wet clay, salt air",
+  "about": "Your photos keep coming back to the wheel, the first coffee of the day and the walk along the water. This collection keeps those textures close: thrown-clay curves, sea-worn colour and the quiet of a weekend market.",
+  "palette": ["#e8dcc6", "#b8714a", "#9fb8ad", "#2f2c2a", "#c99a96"]
+ },
+ "products": [
+  {
+   "category": "ring",
+   "title": "Thrown Rim Band",
+   "prompt": "Ring in sterling silver, 4 mm wide band with a softly uneven, hand-thrown rim profile like the lip of a stoneware bowl, satin finish outside and high polish inside, no stones, comfort fit.",
+   "colors": [],
+   "why": "Hand-thrown ceramics show up in 41% of your moments, more than any other idea.",
+   "signature": ["hand-thrown ceramics"]
+  },
+  {
+   "category": "pendant necklace",
+   "title": "Pour-Over Drop",
+   "prompt": "Pendant necklace in brass, a small 18 mm cone-shaped drop with fine concentric ridges, brushed finish, on a 45 cm fine cable chain, no stones.",
+   "colors": [],
+   "why": "A morning coffee ritual runs through 37% of your moments.",
+   "signature": ["morning coffee ritual"]
+  },
+  {
+   "category": "earrings",
+   "title": "Tide Pool Studs",
+   "prompt": "Earrings in sterling silver, a pair of 9 mm organic pebble-shaped studs with a gently rippled surface like water over rock, oxidised recesses and polished highs, no stones.",
+   "colors": [],
+   "why": "Coastal walks appear in 29% of your moments.",
+   "signature": ["coastal walks"]
+  },
+  {
+   "category": "rug",
+   "title": "Kiln Stripe Rug",
+   "prompt": "Rug, hand-tufted wool, 5x8 ft, wide irregular horizontal bands in oat and clay with a thin charcoal line between them, slightly wavering edges like glaze drips, low even pile.",
+   "colors": ["#e8dcc6", "#b8714a", "#2f2c2a"],
+   "why": "Built from the colours you live with, for the studio and workshop settings that fill 38% of your moments.",
+   "signature": ["hand-thrown ceramics"]
+  },
+  {
+   "category": "throw pillow",
+   "title": "Pressed Petal Pillow",
+   "prompt": "Throw pillow, 18x18 in linen-look woven cover, a loose scattered pattern of small pressed-flower silhouettes in dusty rose and sea glass on an oat ground, soft matte print.",
+   "colors": ["#e8dcc6", "#c99a96", "#9fb8ad"],
+   "why": "Dried flowers turn up in 18% of your moments, and linen and natural textures in 14%.",
+   "signature": ["dried flowers", "linen and natural textures"]
+  },
+  {
+   "category": "wall art print",
+   "title": "Market Morning Print",
+   "prompt": "Wall art print, 12x16 in matte paper, an abstract grid of soft-edged rectangles like market stall awnings seen from above, in sea glass, oat, clay and charcoal, generous margins, no text.",
+   "colors": ["#9fb8ad", "#e8dcc6", "#b8714a", "#2f2c2a"],
+   "why": "Slow weekend markets show up in 16% of your moments.",
+   "signature": ["slow weekend markets"]
+  }
+ ]
+}

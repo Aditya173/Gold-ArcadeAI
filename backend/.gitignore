@@ -1,0 +1,5 @@
+node_modules/
+functions/.env.local
+functions/data/packs/
+*-debug.log
+functions/data/marketplace/
