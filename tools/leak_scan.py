@@ -18,6 +18,9 @@ REPO = Path(__file__).resolve().parent.parent
 BINARY = re.compile(r"\.(jpe?g|png|heic|webp|gif|npy|safetensors|mlpackage|zip|pdf)$", re.I)
 # images uploaded at the repo root by the team (demo screenshots, product images) are allowed where they are
 ASSET_OK = ("app/assets/", "marketplace/fixtures/fake_products/images/", "marketplace/fixtures/images/", "docs/screens/")
+# design-tool bundle exports (a JS loader + one huge base64 blob): deny terms only hit by chance inside
+# the base64; secrets are still checked
+DESIGN_EXPORTS = ("Fan-Made Prototype.html",)
 SECRETS = [re.compile(p) for p in (r"sk-ant-[A-Za-z0-9_-]{20,}", r"arcade_sk_live_[A-Za-z0-9]{8,}",
                                    r"-----BEGIN [A-Z ]*PRIVATE KEY-----", r'"private_key_id"\s*:', r"AIza[0-9A-Za-z_-]{30,}")]
 
@@ -48,7 +51,7 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
         text = read(p)
         # generated dependency lock files list third-party package names ("decoder", ...), not our
         # content: secrets are still checked, deny terms are not
-        lock = p.endswith(("package-lock.json", "yarn.lock", "pnpm-lock.yaml"))
+        lock = p.endswith(("package-lock.json", "yarn.lock", "pnpm-lock.yaml")) or p in DESIGN_EXPORTS
         for t in ([] if lock else terms):
             for m in t.finditer(text):
                 line = text.count("\n", 0, m.start()) + 1
