@@ -1,0 +1,46 @@
+{
+  "schema": "brand.kit.v0",
+  "_note": "DEMO EXAMPLE creator kit describing the public aesthetic of @wishbonekitchen (cooking, dinner parties, lifestyle). Not affiliated and not endorsed. Contains NO logo or photos of theirs: in the real flow the creator uploads their own logos/reference images and connects their own Instagram at onboarding, and those replace the asset placeholders below.",
+  "creatorId": "creator-wishbonekitchen",
+  "name": "Wishbone Kitchen",
+  "handle": "wishbonekitchen",
+  "voice": "warm, generous, a little glamorous, food first",
+  "palette": [
+    {"name": "cream", "hex": "#f3ead7", "role": "neutral"},
+    {"name": "tomato", "hex": "#c8472d", "role": "primary"},
+    {"name": "butter", "hex": "#edd27a", "role": "primary"},
+    {"name": "olive", "hex": "#7a7a3a", "role": "accent"},
+    {"name": "ink", "hex": "#2b2622", "role": "neutral"}
+  ],
+  "motifs": ["the wishbone", "a scalloped edge", "gingham check", "a scattered citrus-and-herb repeat"],
+  "assets": [
+    {"assetId": "logo", "kind": "logo", "mediaType": "image/png", "byteLength": 40000, "describe": "PLACEHOLDER: replaced by the creator's uploaded logo at onboarding"},
+    {"assetId": "pattern-citrus", "kind": "pattern", "mediaType": "image/png", "byteLength": 80000, "describe": "PLACEHOLDER: a scattered citrus-and-herb repeat from the creator's reference images"},
+    {"assetId": "pattern-gingham", "kind": "pattern", "mediaType": "image/png", "byteLength": 60000, "describe": "PLACEHOLDER: a soft gingham check in the brand palette"}
+  ],
+  "templates": [
+    {"templateId": "wk-runner", "category": "textile", "world": "print",
+     "brief": "A long linen-look table runner printed with {brand_element}, with a {fan_motif} detail repeated at each end. Purely graphic, no faces.",
+     "required_brand_element": ["gingham check", "a scattered citrus-and-herb repeat", "a scalloped edge"],
+     "uses_assets": ["pattern-gingham", "pattern-citrus"], "slots": {}},
+    {"templateId": "wk-plate", "category": "ceramic plate", "world": "print",
+     "brief": "A dinner plate with {brand_element} around the rim and a small {fan_motif} at the centre. Purely graphic.",
+     "required_brand_element": ["a scalloped edge", "a scattered citrus-and-herb repeat"],
+     "uses_assets": ["pattern-citrus"], "slots": {}},
+    {"templateId": "wk-print", "category": "wall art print", "world": "print",
+     "brief": "A {size} kitchen wall print: {brand_element} framing {fan_motif}. Flat colour, purely graphic, no faces.",
+     "required_brand_element": ["gingham check", "a scattered citrus-and-herb repeat", "the wishbone"],
+     "uses_assets": ["pattern-citrus", "logo"], "slots": {"size": ["12x16 in", "18x24 in"]}},
+    {"templateId": "wk-pendant", "category": "pendant necklace", "world": "jewelry",
+     "brief": "A {metal} pendant in the shape of the wishbone, with a small engraved {fan_motif} on the back. No stones, purely graphic.",
+     "required_brand_element": ["wishbone"],
+     "uses_assets": [], "slots": {"metal": ["14k yellow gold", "sterling silver"]}}
+  ],
+  "rules": {
+    "min_brand_colors": 2,
+    "fan_accent_colors": 1,
+    "forbidden_words": ["logo", "trademark", "text", "letters", "photo of"],
+    "royalty_pct": 15,
+    "public_tag_requires_opt_in": true
+  }
+}

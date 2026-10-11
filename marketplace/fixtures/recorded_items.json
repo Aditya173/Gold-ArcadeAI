@@ -1,26 +1,80 @@
 {
-  "tc-print|archetype-first-light-solitary": {
-    "title": "First Light Rings",
-    "brief": "A 12x16 in wall print: thrown-ring stripes framing a sunrise over a ridgeline, the sun drawn as the innermost ring. Flat colour in clay, sea glass and oat, with one warm peach glow at the horizon. Purely graphic, no faces.",
-    "fan_idea": "sunrise over ridgeline",
-    "colors": ["#b8714a", "#9fb8ad", "#e8dcc6", "#f2b98a"],
-    "why_owner": "Sunrise over a ridgeline shows up in 40% of your moments, so the sun sits inside the brand's rings.",
-    "public_tag": "for early-morning walkers"
-  },
-  "tc-pillow|archetype-small-table-host": {
-    "title": "Table for Four",
-    "brief": "An 18 in throw pillow cover printed with thrown-ring stripes and a small dinner table for four detail in one corner: four plates seen from above as simple rings around one round table. Clay, oat and charcoal.",
-    "fan_idea": "dinner table for four",
-    "colors": ["#b8714a", "#e8dcc6", "#2f2c2a"],
-    "why_owner": "A dinner table for four shows up in 40% of your moments, so the corner holds your table.",
-    "public_tag": "for people who host"
-  },
-  "tc-pendant|archetype-night-shift-builder": {
-    "title": "Late Wave Pendant",
-    "brief": "A sterling silver pendant in the shape of the wave-and-wheel mark (a ring crossed by one wave), with a small engraved desk lamp and crescent on the back for late desk sessions. No stones.",
-    "fan_idea": "late desk sessions",
-    "colors": [],
-    "why_owner": "Late desk sessions show up in 45% of your moments, so the back carries a lamp and a crescent.",
-    "public_tag": "for night owls"
-  }
+ "tc-print|archetype-first-light-solitary": {
+  "title": "First Light Rings",
+  "brief": "A 12x16 in wall print: thrown-ring stripes framing a sunrise over a ridgeline, the sun drawn as the innermost ring. Flat colour in clay, sea glass and oat, with one warm peach glow at the horizon. Purely graphic, no faces.",
+  "fan_idea": "sunrise over ridgeline",
+  "colors": [
+   "#b8714a",
+   "#9fb8ad",
+   "#e8dcc6",
+   "#f2b98a"
+  ],
+  "why_owner": "Sunrise over a ridgeline shows up in 40% of your moments, so the sun sits inside the brand's rings.",
+  "public_tag": "for early-morning walkers"
+ },
+ "tc-pillow|archetype-small-table-host": {
+  "title": "Table for Four",
+  "brief": "An 18 in throw pillow cover printed with thrown-ring stripes and a small dinner table for four detail in one corner: four plates seen from above as simple rings around one round table. Clay, oat and charcoal.",
+  "fan_idea": "dinner table for four",
+  "colors": [
+   "#b8714a",
+   "#e8dcc6",
+   "#2f2c2a"
+  ],
+  "why_owner": "A dinner table for four shows up in 40% of your moments, so the corner holds your table.",
+  "public_tag": "for people who host"
+ },
+ "tc-pendant|archetype-night-shift-builder": {
+  "title": "Late Wave Pendant",
+  "brief": "A sterling silver pendant in the shape of the wave-and-wheel mark (a ring crossed by one wave), with a small engraved desk lamp and crescent on the back for late desk sessions. No stones.",
+  "fan_idea": "late desk sessions",
+  "colors": [],
+  "why_owner": "Late desk sessions show up in 45% of your moments, so the back carries a lamp and a crescent.",
+  "public_tag": "for night owls"
+ },
+ "wk-runner|archetype-long-table-host": {
+  "title": "Long Table Runner",
+  "brief": "A long linen-look table runner printed with gingham check, with a long table dinner parties detail repeated at each end: a row of place settings seen from above. Tomato, cream and butter. Purely graphic, no faces.",
+  "fan_idea": "long table dinner parties",
+  "colors": [
+   "#c8472d",
+   "#f3ead7",
+   "#edd27a"
+  ],
+  "why_owner": "Long-table dinner parties show up in 38% of your moments, so the runner is made for a full table.",
+  "public_tag": "for people who host a crowd"
+ },
+ "wk-plate|archetype-long-table-host": {
+  "title": "Fresh Pasta Plate",
+  "brief": "A dinner plate with a scalloped edge around the rim and a small nest of fresh pasta made from scratch at the centre. Cream with a tomato rim and one olive accent. Purely graphic.",
+  "fan_idea": "pasta made from scratch",
+  "colors": [
+   "#f3ead7",
+   "#c8472d",
+   "#7a7a3a"
+  ],
+  "why_owner": "Pasta made from scratch shows up in 31% of your moments, so it sits at the centre of the plate.",
+  "public_tag": "for weekend pasta makers"
+ },
+ "wk-print|archetype-long-table-host": {
+  "title": "Market Morning",
+  "brief": "A 12x16 in kitchen wall print: a scattered citrus-and-herb repeat framing a farmers market mornings scene drawn as crates of tomatoes and lemons. Flat colour, purely graphic, no faces.",
+  "fan_idea": "farmers market mornings",
+  "colors": [
+   "#edd27a",
+   "#c8472d",
+   "#f3ead7",
+   "#b8613f"
+  ],
+  "why_owner": "Farmers market mornings show up in 22% of your moments, so the print starts at the market.",
+  "public_tag": "for early market shoppers"
+ },
+ "wk-pendant|archetype-long-table-host": {
+  "title": "Candlelit Wishbone",
+  "brief": "A 14k yellow gold pendant in the shape of the wishbone, with a small engraved taper candle on the back for candlelit tablescapes. No stones, purely graphic.",
+  "fan_idea": "candlelit tablescapes",
+  "colors": [],
+  "why_owner": "Candlelit tablescapes show up in 27% of your moments, so the back carries a single taper candle.",
+  "public_tag": "for candlelit dinners"
+ }
 }

@@ -1,0 +1,57 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-long-table-host",
+ "_note": "SYNTHETIC Gold insight pack for the demo: a fan of the example creator @wishbonekitchen (cooking, dinner parties, lifestyle). Built by recombining traits from existing Gold archetypes (see archetype.borrowed_from). Not a person. Palette and shares are example values.",
+ "archetype": {
+  "name": "Long-Table Host",
+  "one_line": "Cooks for a crowd and turns an ordinary week night into a dinner party.",
+  "reads": {
+   "rhythms": "The week is quiet and the energy is saved for one long night: market in the morning, cooking all afternoon, a full table after dark that runs late.",
+   "life_phases": "Every new place becomes the venue first; the table, the good plates and the people come before the rest of the flat is unpacked."
+  },
+  "title_phrasings": [
+   "Cooks for twelve without being asked",
+   "Gets a second wind when the room fills",
+   "Shops the market before planning the menu",
+   "Saves the week's energy for one long dinner",
+   "Sets the table before anything else"
+  ],
+  "social": "big groups over one-to-one: the table is full, rarely a table for two",
+  "borrowed_from": {
+   "small-table-host": "cooks the occasion themselves; candlelight; handmade touches (scaled up from four to a crowd)",
+   "two-gear-day": "gets a second wind when the room fills; the night goes to company and volume",
+   "same-order-regular": "saves the week's energy for one big night",
+   "first-light-solitary": "up early, but for the market rather than the trail"
+  }
+ },
+ "photos": {"count": 340, "events": 88},
+ "signature": [
+  {"idea": "long table dinner parties", "share_of_events": 0.38, "strength": 0.9, "evidence": ["ev-201", "ev-214", "ev-233"], "synonyms": ["full dinner table", "friends crowded round"]},
+  {"idea": "pasta made from scratch", "share_of_events": 0.31, "strength": 0.84, "evidence": ["ev-205", "ev-240"], "synonyms": ["flour on the counter", "fresh pasta"]},
+  {"idea": "candlelit tablescapes", "share_of_events": 0.27, "strength": 0.8, "evidence": ["ev-219", "ev-251"], "synonyms": ["taper candles", "set table"]},
+  {"idea": "farmers market mornings", "share_of_events": 0.22, "strength": 0.74, "evidence": ["ev-262", "ev-270"], "synonyms": ["produce stalls", "market haul"]},
+  {"idea": "linen and stoneware", "share_of_events": 0.18, "strength": 0.66, "evidence": ["ev-281"], "synonyms": ["linen napkins", "ceramic platters"]},
+  {"idea": "wine poured for the table", "share_of_events": 0.16, "strength": 0.6, "evidence": ["ev-288"], "synonyms": ["natural wine", "glasses raised"]},
+  {"idea": "handwritten place cards", "share_of_events": 0.11, "strength": 0.55, "evidence": ["ev-295"], "synonyms": ["menu cards"]}
+ ],
+ "palette": [
+  {"name": "cream", "hex": "#f3ead7", "share": 0.28, "source": "lives_with"},
+  {"name": "tomato", "hex": "#c8472d", "share": 0.19, "source": "lives_with"},
+  {"name": "olive", "hex": "#7a7a3a", "share": 0.17, "source": "lives_with"},
+  {"name": "butter", "hex": "#edd27a", "share": 0.14, "source": "saves"},
+  {"name": "terracotta", "hex": "#b8613f", "share": 0.12, "source": "goes_to"},
+  {"name": "wine", "hex": "#5a2230", "share": 0.1, "source": "goes_to"}
+ ],
+ "places": [
+  {"type": "dining table", "share_of_events": 0.42},
+  {"type": "kitchen", "share_of_events": 0.33},
+  {"type": "farmers market", "share_of_events": 0.18},
+  {"type": "garden or backyard", "share_of_events": 0.14},
+  {"type": "restaurant", "share_of_events": 0.12}
+ ],
+ "reliability": {
+  "signature": {"status": "unmeasured", "note": "synthetic insight pack"},
+  "palette": {"status": "unmeasured", "note": "synthetic insight pack"},
+  "places": {"status": "unmeasured", "note": "synthetic insight pack"}
+ }
+}
