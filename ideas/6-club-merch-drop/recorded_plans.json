@@ -1,0 +1,18 @@
+{
+ "_note": "Hand-written plans for the invented Tidewater club, used when no ANTHROPIC_API_KEY is set (or --plan is not passed). The club plan passes planner.check against the album reading; each member plan against that member's own reading.",
+ "club": {
+  "store": {"name": "Tidewater Season", "tagline": "Dawn on the harbour, coffee after", "about": "Your club's season kept starting at the waterfront before sunrise and ending over coffee. These two pieces are for the clubhouse wall and floor, in the season's own colours.", "palette": ["#2e5a7a", "#d8dcd9", "#df7a5f", "#e9c46a", "#3a3d40"]},
+  "products": [
+   {"category": "rug", "title": "Harbour Loop Rug", "prompt": "A printed flat rug, 4 x 6 ft: one continuous looping line in sunrise coral over a harbour-blue field, a fog-grey band along the bottom edge like early mist, simple bold shapes, no text, no logos.", "colors": ["#2e5a7a", "#df7a5f", "#d8dcd9"], "why": "Dawn harbour runs show up in 42% of the club's moments.", "signature": ["dawn harbour runs"]},
+   {"category": "wall art print", "title": "After the Run", "prompt": "An abstract wall print: a row of simple round cup shapes in buoy yellow and coral on a fog-grey ground, one asphalt-grey horizon line, flat matte colour, no text, no figures.", "colors": ["#d8dcd9", "#e9c46a", "#df7a5f", "#3a3d40"], "why": "Post-run coffee is in 31% of the club's moments.", "signature": ["post-run coffee"]}
+  ]
+ },
+ "members": {
+  "person-1": {
+   "store": {"name": "Your Season", "tagline": "The hills you kept going back to", "about": "Built only from the events you tagged yourself into. Your season leaned uphill more than the club's did.", "palette": ["#3f5e4a", "#d8dcd9"]},
+   "products": [
+    {"category": "pendant necklace", "title": "Switchback Disc", "prompt": "A sterling silver pendant, brushed finish, 22 mm round disc with a raised zigzag line climbing from the bottom edge to a small polished dot near the top, 1.2 mm thick, simple bail, no stones, no text.", "colors": [], "why": "Trail switchbacks show up in 56% of the moments you tagged yourself into.", "signature": ["trail switchbacks"]}
+   ]
+  }
+ }
+}

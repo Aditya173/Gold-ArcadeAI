@@ -1,0 +1,23 @@
+{
+ "_note": "Hand-written recorded plan for the invented creator_maya roll reading. Used when there is no ANTHROPIC_API_KEY (or no --plan). Must pass planner.check.",
+ "store": {"name": "Clay and Tide", "tagline": "A set made from your own roll",
+           "about": "Your roll keeps returning to the wheel, the morning cup and the walk along the cliffs. These are pieces to wear and live with.",
+           "palette": ["#e8dcc6", "#b8714a", "#9fb8ad", "#2f2c2a"]},
+ "products": [
+  {"category": "ring", "title": "Thrown Cup Ring",
+   "prompt": "Ring in sterling silver: a 6 mm wide band with a soft ridged surface like the throwing lines on a wheel-made cup, comfort fit, satin finish. No stones, no engraving, no text.",
+   "colors": [], "why": "Hand-thrown ceramics are in 41% of your moments, more than any other idea in your photos.", "signature": ["hand-thrown ceramics"]},
+  {"category": "pendant necklace", "title": "Pour-Over Drop",
+   "prompt": "Pendant necklace in sterling silver: a 22 mm teardrop with a small open cone at its centre, like a pour-over dripper seen from above, polished edge, matte face, on an 18 in chain. No stones, no text.",
+   "colors": [], "why": "A morning coffee ritual shows up in 37% of your moments.", "signature": ["morning coffee ritual"]},
+  {"category": "rug", "title": "Tide Pool Rug",
+   "prompt": "Printed area rug, 5x8 ft, low pile: irregular rounded pools of sea glass and oat on a charcoal ground, like tide pools seen from a cliff, shapes at least 8 inches across. Flat printed pattern, no fringe, no text.",
+   "colors": ["#9fb8ad", "#e8dcc6", "#2f2c2a"], "why": "Coastal walks are in 29% of your moments.", "signature": ["coastal walks"]},
+  {"category": "wall art print", "title": "Pressed Stems",
+   "prompt": "Wall art print, 11x14 in, matte paper: three pressed flower stems as soft silhouettes in dusty rose and clay on an oat ground, wide margins. No text.",
+   "colors": ["#c99a96", "#b8714a", "#e8dcc6"], "why": "Dried flowers appear in 18% of your moments.", "signature": ["dried flowers"]},
+  {"category": "throw pillow", "title": "Market Cloth Pillow",
+   "prompt": "Printed throw pillow, 20x20 in: a loose check of oat and clay with a thin charcoal line, like a market tablecloth, flat print on a linen-look cover, hidden zip. No text.",
+   "colors": ["#e8dcc6", "#b8714a", "#2f2c2a"], "why": "Slow weekend markets are in 16% of your moments, and linen and natural textures in 14%.", "signature": ["slow weekend markets", "linen and natural textures"]}
+ ]
+}

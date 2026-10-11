@@ -1,0 +1,171 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-borrowed-calendar",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Borrowed-Calendar Regular",
+  "one_line": "Takes the shape of a schedule someone else set — a term, a season, a posting — and keeps a private routine running underneath it.",
+  "reads": {
+   "rhythms": "The week is metered by fixtures, rosters and term dates; the hours they actually own get spent deliberately, often on something with a score or a countdown attached.",
+   "life_phases": "They move cleanly from one structured container to the next and fill the handover fast, carrying the same private habits — a game, a playlist, a training slot — through every change of setting."
+  },
+  "title_phrasings": [
+   "Lives by a schedule someone else set",
+   "Counts the days down to a fixed date",
+   "Fills the gap between one term and the next",
+   "Turns up in full for a duty that repeats",
+   "Keeps the same habits in every setting"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "game score screen",
+   "share_of_events": 0.35,
+   "strength": 0.85,
+   "synonyms": [
+    "match result",
+    "leaderboard screenshot"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "countdown calendar",
+   "share_of_events": 0.25,
+   "strength": 0.75,
+   "synonyms": [
+    "crossed-off dates",
+    "days remaining"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "team training field",
+   "share_of_events": 0.25,
+   "strength": 0.75,
+   "synonyms": [
+    "practice pitch",
+    "sports ground"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "uniform laid out",
+   "share_of_events": 0.2,
+   "strength": 0.7,
+   "synonyms": [
+    "duty kit",
+    "folded uniform"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "small bedroom setup",
+   "share_of_events": 0.2,
+   "strength": 0.65,
+   "synonyms": [
+    "bedroom gaming corner",
+    "dorm desk"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "playlist on phone",
+   "share_of_events": 0.15,
+   "strength": 0.55,
+   "synonyms": [
+    "music screenshot"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "field green",
+   "hex": "#4f8a3c",
+   "share": 0.25,
+   "source": "goes_to"
+  },
+  {
+   "name": "screen glow blue",
+   "hex": "#2f5bd3",
+   "share": 0.25,
+   "source": "saves"
+  },
+  {
+   "name": "uniform navy",
+   "hex": "#1f2b4d",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "bedroom grey",
+   "hex": "#a3a6ab",
+   "share": 0.15,
+   "source": "lives_with"
+  },
+  {
+   "name": "scoreboard yellow",
+   "hex": "#f2c230",
+   "share": 0.15,
+   "source": "saves"
+  }
+ ],
+ "places": [
+  {
+   "type": "phone screen",
+   "share_of_events": 0.4
+  },
+  {
+   "type": "bedroom",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "sports field",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "restaurant",
+   "share_of_events": 0.1
+  },
+  {
+   "type": "clothing store",
+   "share_of_events": 0.1
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

@@ -1,0 +1,170 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-household-anchored",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Household-Anchored",
+  "one_line": "The day gets built backwards from a dependent and the home it lives in.",
+  "reads": {
+   "rhythms": "Fixed returns and daily upkeep set the clock, so an open-ended late night gets cut short and the plans that win are the ones a creature can come along on.",
+   "life_phases": "Through moves and new terms the household is the stable address, and a phase change gets judged by whether the dependents travel and settle first."
+  },
+  "title_phrasings": [
+   "Plans the day around the walks",
+   "Solves a problem by buying the right gear",
+   "Brings the dog along to the plan",
+   "Keeps the household running through the busy weeks",
+   "Comes home before the night is over"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "dog on walks",
+   "share_of_events": 0.45,
+   "strength": 0.9,
+   "synonyms": [
+    "leash and dog",
+    "park stroll with dog"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "pet on sofa",
+   "share_of_events": 0.35,
+   "strength": 0.8,
+   "synonyms": [
+    "dog on couch",
+    "curled-up pet"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "new pet gear",
+   "share_of_events": 0.2,
+   "strength": 0.7,
+   "synonyms": [
+    "dog bed unboxed",
+    "feeding bowls"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "dog under restaurant table",
+   "share_of_events": 0.2,
+   "strength": 0.7,
+   "synonyms": [
+    "pet-friendly patio"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "home chores in progress",
+   "share_of_events": 0.15,
+   "strength": 0.6,
+   "synonyms": [
+    "laundry pile",
+    "tidy kitchen"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "home before dark",
+   "share_of_events": 0.15,
+   "strength": 0.55,
+   "synonyms": [
+    "lamps on at dusk"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "sofa beige",
+   "hex": "#d8c8ac",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "fur brown",
+   "hex": "#8b6544",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "park green",
+   "hex": "#5f8f4a",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "warm lamp white",
+   "hex": "#f3e2bf",
+   "share": 0.15,
+   "source": "lives_with"
+  },
+  {
+   "name": "leash red",
+   "hex": "#c0392b",
+   "share": 0.15,
+   "source": "saves"
+  }
+ ],
+ "places": [
+  {
+   "type": "living room",
+   "share_of_events": 0.4
+  },
+  {
+   "type": "park",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "bedroom",
+   "share_of_events": 0.15
+  },
+  {
+   "type": "restaurant",
+   "share_of_events": 0.12
+  },
+  {
+   "type": "photo studio",
+   "share_of_events": 0.1
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

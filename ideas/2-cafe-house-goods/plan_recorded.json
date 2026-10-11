@@ -1,0 +1,20 @@
+{
+ "_note": "Hand-written recorded plan for the invented cafe_owner_lark reading. Used when there is no ANTHROPIC_API_KEY (or no --plan). Must pass planner.check.",
+ "store": {"name": "Tile and Oak", "tagline": "A room set from the room itself",
+           "about": "Your shoot keeps coming back to the terracotta floor, the open shelves and the bentwood chairs. This set carries them into a rug, a print, a pillow and a plate.",
+           "palette": ["#b5603f", "#ece6dc", "#a07a52", "#8a8d8f", "#6f7445"]},
+ "products": [
+  {"category": "rug", "for": "room", "title": "Tile Floor Entrance Rug",
+   "prompt": "Printed entrance rug, 3x5 ft, low pile for commercial foot traffic: large hexagon tiles in terracotta with thin limewash-white grout lines and a zinc grey border, each tile at least 5 inches across. Flat printed pattern, no fringe, no text, no logo.",
+   "colors": ["#b5603f", "#ece6dc", "#8a8d8f"], "why": "Terracotta floor tile is in 75% of the shoot's moments.", "signature": ["terracotta floor tile"]},
+  {"category": "wall art print", "for": "room+shelf", "title": "Stoneware Shelf Print",
+   "prompt": "Wall art print, 18x24 in, matte paper: rows of simple cup and bowl silhouettes on open shelves, flat shapes in oak, olive and limewash white, no shading. No text, no logo.",
+   "colors": ["#a07a52", "#6f7445", "#ece6dc"], "why": "Open shelves of stoneware show up in 58% of the moments.", "signature": ["open shelves of stoneware"]},
+  {"category": "throw pillow", "for": "room", "title": "Bentwood Curve Pillow",
+   "prompt": "Printed throw pillow for banquette seating, 18x18 in: a repeat of loose bentwood chair curves in oak on limewash white with olive accents, lines at least 1 cm wide. Flat print, wipeable cover, hidden zip. No text.",
+   "colors": ["#a07a52", "#ece6dc", "#6f7445"], "why": "Bentwood chairs are in 50% of the moments.", "signature": ["bentwood chairs"]},
+  {"category": "ceramic", "for": "room+shelf", "title": "Morning Window Plate",
+   "prompt": "Decorative ceramic plate, 10 in, for display only, not for food service: a tall arched window shape in limewash white on a terracotta ground with a thin zinc grey rim. No text.",
+   "colors": ["#ece6dc", "#b5603f", "#8a8d8f"], "why": "Tall windows and morning light are in 33% of the moments.", "signature": ["tall windows and morning light"]}
+ ]
+}

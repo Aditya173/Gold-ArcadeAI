@@ -10,10 +10,10 @@ short-lived), and appends one record per brief to out/designs.jsonl.
   Stops at the first 401/402/403 or any error mentioning credits/billing (brief §5).
   Never creates a checkout.
 
-  python tools/arcade/run_designs.py --list     # show the category mapping, spend nothing
-  python tools/arcade/run_designs.py            # run (needs ARCADE_API_KEY)
-  python tools/arcade/run_designs.py --briefs storefront_briefs.json   # the storefront's 6 pieces
-  python tools/arcade/run_designs.py --mock --briefs <file>   # mock Arcade (mock_arcade.py + the
+  python arcade/run_designs.py --list     # show the category mapping, spend nothing
+  python arcade/run_designs.py            # run (needs ARCADE_API_KEY)
+  python arcade/run_designs.py --briefs storefront_briefs.json   # the storefront's 6 pieces
+  python arcade/run_designs.py --mock --briefs <file>   # mock Arcade (mock_arcade.py + the
         category fixture): no network, no key; writes designs_mock.jsonl / calls_mock.jsonl only,
         so a mock run can never make the live run skip a brief. Without --mock the live
         transport is still refused unless ARCADE_LIVE=1.

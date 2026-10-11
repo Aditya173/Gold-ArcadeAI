@@ -4,13 +4,13 @@ NO ARCADE CALLS BEFORE THE HACKATHON. Everything that would talk to Arcade talks
 
   python transport   from mock_arcade import mock_transport
                      Arcade(key="arcade_sk_live_MOCK", transport=mock_transport, sleep=lambda s: None)
-  local HTTP server  python tools/arcade/mock_arcade.py --serve 8787
+  local HTTP server  python arcade/mock_arcade.py --serve 8787
                      -> POST http://127.0.0.1:8787/v1/<procedure>, JSON body, Bearer arcade_sk_live_...
                      (point the Functions emulator's ARCADE_BASE_URL at http://127.0.0.1:8787/v1)
-  selftest           python tools/arcade/mock_arcade.py --selftest
+  selftest           python arcade/mock_arcade.py --selftest
 
 What it does
-  * validates every request body against the request schema in tools/arcade/openapi.json
+  * validates every request body against the request schema in arcade/openapi.json
     (required, maxLength 1000 prompt, <=10 colors, <=3 referenceIds, ...), plus the docs' rules
     the schema can't say: no colors/referenceIds/modelId on a jewelry category, products/create
     refuses jewelry. Bad body -> 400 {code: BAD_REQUEST, fieldErrors}. (Mock's choice of code;
@@ -19,7 +19,7 @@ What it does
     patternId + productId, products/get with a placeholder image, a mock maker, and a unitPrice
     from PRICE MODEL below. Every price object carries "mock": true. A mock price is never real.
   * idempotency like the docs: same requestId + same body replays; different body -> 409.
-  * categories from tools/arcade/categories_fixture.json (each entry "source": docs|inferred), or
+  * categories from arcade/categories_fixture.json (each entry "source": docs|inferred), or
     from categories_live.json once `arcade.py categories --save` has run on hackathon day.
   * checkouts/create answers with a mock checkoutUrl (the app stops there); orders/get is 404.
   * fault injection, one per call:  admission (400 prompt/category mismatch) | job_fail (job fails
@@ -133,6 +133,23 @@ class MockArcade:
             jid = out[1].get("jobId")
             self.seen[(proc, body["requestId"])] = (canon, (lambda: (200, self._job(jid), {})) if jid else out)
         return out
+
+    # references: the brand's logo / pattern images that steer a PRINT design (jewelry refuses them)
+    def _references_createUpload(self, body, fault):
+        ext = {"image/gif": "gif", "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}[body["mediaType"]]
+        uid = f"{uuid.uuid4()}.{ext}"
+        self.uploads = getattr(self, "uploads", {})
+        self.uploads[uid] = body["mediaType"]
+        return 200, {"uploadId": uid, "uploadUrl": f"{self.image_base}upload/{uid}", "method": "PUT",
+                     "requiredHeaders": {"Content-Type": body["mediaType"]}, "expiresAt": _now()}, {}
+
+    def _references_create(self, body, fault):
+        mt = getattr(self, "uploads", {}).get(body["uploadId"])
+        if mt is None:
+            return _err(404, "NOT_FOUND", "unknown uploadId (mock)")
+        rid = "ref-" + body["uploadId"].split(".")[0][:8]
+        return 200, {"imageUrl": f"{self.image_base}ref/{rid}.png", "thumbnailUrl": f"{self.image_base}ref/{rid}_t.png",
+                     "width": 1024, "height": 1024, "mediaType": mt, "referenceId": rid, "createdAt": _now()}, {}
 
     def _cat(self, cid):
         return self.categories.get(cid)
@@ -337,6 +354,11 @@ def _selftest() -> None:
     st, r, _ = m("patterns/create", {"requestId": "a", "prompt": "ring", "categoryId": ring, "colors": ["#c9a227"]}, K)
     ok(st == 400 and r["fieldErrors"][0]["path"] == "colors", "colors on jewelry -> 400")
     ok(m("patterns/create", {"requestId": "a", "prompt": "ring", "categoryId": pend, "referenceIds": ["r1"]}, K)[0] == 400, "referenceIds on jewelry -> 400")
+    st, up, _ = m("references/createUpload", {"requestId": "ru1", "mediaType": "image/png", "byteLength": 2048}, K)
+    shaped("references/createUpload", up)
+    st2, ref, _ = m("references/create", {"requestId": "rc1", "uploadId": up["uploadId"]}, K)
+    ok(st == 200 and st2 == 200 and ref["referenceId"].startswith("ref-"), "references: createUpload -> create")
+    shaped("references/create", ref)
     ok(m("jobs/get", {}, K)[0] == 400 and m("products/get", {"productId": ""}, K)[0] == 400, "other procedures validated too")
     st, r, _ = m("categories/list", {}, K)
     shaped("categories/list", r)

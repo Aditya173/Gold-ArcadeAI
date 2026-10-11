@@ -1,0 +1,94 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "fixture-host-wren-room-1",
+ "_note": "INVENTED short-term-rental host for development (listing photos the host owns, uploaded per room). Not a real property. Reading of one room (bedroom).",
+ "photos": {
+  "count": 28,
+  "events": 4
+ },
+ "signature": [
+  {
+   "idea": "rust bedding",
+   "share_of_events": 0.5,
+   "strength": 0.7,
+   "evidence": [
+    "ev-721",
+    "ev-723"
+   ],
+   "synonyms": [
+    "rust throw"
+   ]
+  },
+  {
+   "idea": "linen bedding",
+   "share_of_events": 0.75,
+   "strength": 0.66,
+   "evidence": [
+    "ev-722"
+   ],
+   "synonyms": []
+  },
+  {
+   "idea": "brass fittings",
+   "share_of_events": 0.25,
+   "strength": 0.48,
+   "evidence": [
+    "ev-724"
+   ],
+   "synonyms": []
+  }
+ ],
+ "palette": [
+  {
+   "name": "oat linen",
+   "hex": "#ebe3d3",
+   "share": 0.34,
+   "source": "lives_with"
+  },
+  {
+   "name": "walnut",
+   "hex": "#6b4a33",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "rust",
+   "hex": "#a4512f",
+   "share": 0.12,
+   "source": "lives_with"
+  },
+  {
+   "name": "brass",
+   "hex": "#b08d57",
+   "share": 0.1,
+   "source": "lives_with"
+  },
+  {
+   "name": "olive",
+   "hex": "#77784f",
+   "share": 0.1,
+   "source": "lives_with"
+  }
+ ],
+ "places": [
+  {
+   "type": "bedroom",
+   "share_of_events": 1.0
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "measured",
+   "value": 0.7,
+   "note": "fixture value; the real SDK reports its own"
+  },
+  "palette": {
+   "status": "measured",
+   "value": 0.9
+  },
+  "places": {
+   "status": "measured",
+   "value": 0.8
+  }
+ }
+}

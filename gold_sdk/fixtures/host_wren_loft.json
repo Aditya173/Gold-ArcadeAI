@@ -1,0 +1,88 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "fixture-host-wren-room-3",
+ "_note": "INVENTED short-term-rental host for development (listing photos the host owns, uploaded per room). Not a real property. Reading of one room (loft).",
+ "photos": {
+  "count": 26,
+  "events": 4
+ },
+ "signature": [
+  {
+   "idea": "mustard armchair",
+   "share_of_events": 0.5,
+   "strength": 0.68,
+   "evidence": [
+    "ev-741"
+   ],
+   "synonyms": [
+    "mustard chair"
+   ]
+  },
+  {
+   "idea": "exposed beams",
+   "share_of_events": 0.75,
+   "strength": 0.62,
+   "evidence": [
+    "ev-742",
+    "ev-743"
+   ],
+   "synonyms": []
+  },
+  {
+   "idea": "olive textiles",
+   "share_of_events": 0.25,
+   "strength": 0.4,
+   "evidence": [
+    "ev-744"
+   ],
+   "synonyms": []
+  }
+ ],
+ "palette": [
+  {
+   "name": "oat linen",
+   "hex": "#ebe3d3",
+   "share": 0.3,
+   "source": "lives_with"
+  },
+  {
+   "name": "charcoal",
+   "hex": "#3b3a38",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "olive",
+   "hex": "#77784f",
+   "share": 0.12,
+   "source": "lives_with"
+  },
+  {
+   "name": "mustard",
+   "hex": "#c98b3a",
+   "share": 0.12,
+   "source": "lives_with"
+  }
+ ],
+ "places": [
+  {
+   "type": "loft",
+   "share_of_events": 1.0
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "measured",
+   "value": 0.7,
+   "note": "fixture value; the real SDK reports its own"
+  },
+  "palette": {
+   "status": "measured",
+   "value": 0.9
+  },
+  "places": {
+   "status": "measured",
+   "value": 0.8
+  }
+ }
+}

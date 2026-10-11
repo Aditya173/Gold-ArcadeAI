@@ -1,0 +1,32 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-diner-theo",
+  "_note": "INVENTED diner for development: a camera roll full of meals at many places. Not a reading of anyone's photos.",
+  "photos": {"count": 540, "events": 130},
+  "signature": [
+    {"idea": "hand-made pasta", "share_of_events": 0.31, "strength": 0.78, "evidence": ["ev-401", "ev-412"], "synonyms": ["fresh tagliatelle"]},
+    {"idea": "espresso at the counter", "share_of_events": 0.27, "strength": 0.72, "evidence": ["ev-404", "ev-420"], "synonyms": ["coffee bar"]},
+    {"idea": "street tacos", "share_of_events": 0.22, "strength": 0.66, "evidence": ["ev-431"], "synonyms": ["taco stand"]},
+    {"idea": "market fruit stalls", "share_of_events": 0.18, "strength": 0.6, "evidence": ["ev-440", "ev-447"], "synonyms": ["farmers market"]},
+    {"idea": "weekend brunch plates", "share_of_events": 0.15, "strength": 0.53, "evidence": ["ev-455"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "tomato", "hex": "#c8442f", "share": 0.24, "source": "goes_to"},
+    {"name": "linen", "hex": "#e9e1d3", "share": 0.23, "source": "lives_with"},
+    {"name": "espresso", "hex": "#3a2a22", "share": 0.19, "source": "goes_to"},
+    {"name": "lemon", "hex": "#e8c95a", "share": 0.13, "source": "goes_to"},
+    {"name": "basil", "hex": "#5b7a4a", "share": 0.11, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "restaurant", "share_of_events": 0.44},
+    {"type": "cafe", "share_of_events": 0.31},
+    {"type": "market", "share_of_events": 0.17}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.84, "note": "fixture value; the real SDK reports its own"},
+    "palette": {"status": "measured", "value": 0.6, "note": "fixture: a palette across many restaurants is a mood, not one room"},
+    "places": {"status": "measured", "value": 0.78},
+    "named_places": {"status": "unmeasured"},
+    "people": {"status": "unmeasured"}
+  }
+}

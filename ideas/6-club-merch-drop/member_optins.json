@@ -1,0 +1,8 @@
+{
+ "_note": "INVENTED opt-ins. Each member chose to take part, got an anonymous ref, and tagged the album events they were at from the event list (time and place only). Nobody is found by face.",
+ "members": [
+  {"ref": "person-1", "consent": true, "events": ["ev-406", "ev-412", "ev-415", "ev-421", "ev-427", "ev-433", "ev-450", "ev-458", "ev-463"]},
+  {"ref": "person-2", "consent": true, "events": ["ev-402", "ev-431", "ev-440"]},
+  {"ref": "person-3", "consent": false, "events": ["ev-401", "ev-406", "ev-412", "ev-431", "ev-440", "ev-450"]}
+ ]
+}

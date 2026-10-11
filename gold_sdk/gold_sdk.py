@@ -1,6 +1,8 @@
 """gold_sdk.py -- the ONE boundary between this repo and Gold.
 
-`read(photos)` returns a `gold.reading.v0` (see README.md, contract.schema.json). How photos are read
+`read(photos)` returns a `gold.reading.v0` (see README.md, contract.schema.json). FOR THE DEMO the
+reading is an uploaded Gold INSIGHT PACK (insights/archetype-*.json) or an invented example
+(fixtures/), chosen per user: `read([], fixture="archetype-small-table-host")`. How photos are read
 is not in this repo; the protected Gold SDK replaces `_gold_read` here. Until it does, `read()`
 returns an INVENTED fixture (marked `"stub": true`) so the planner, the app and the ideas can be
 built and tested end to end.
@@ -15,7 +17,8 @@ import json, os, re, sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-FIXTURES = HERE / "fixtures"
+FIXTURES = HERE / "fixtures"      # invented example people
+INSIGHTS = HERE / "insights"      # Gold insight packs (archetypes) uploaded for the demo
 HEX = re.compile(r"^#[0-9a-f]{6}$")
 
 
@@ -28,8 +31,16 @@ def _gold_read(photos: list[str]) -> dict | None:
     return gold_protected.read(photos)
 
 
+def _path(name: str) -> Path:
+    for d in (INSIGHTS, FIXTURES):
+        if (d / f"{name}.json").exists():
+            return d / f"{name}.json"
+    raise FileNotFoundError(f"no insight pack or fixture named {name!r}; have {fixtures()}")
+
+
 def fixtures() -> list[str]:
-    return sorted(p.stem for p in FIXTURES.glob("*.json"))
+    """Every pack a demo user can be given: Gold insight packs first, then invented examples."""
+    return sorted(p.stem for p in INSIGHTS.glob("*.json")) + sorted(p.stem for p in FIXTURES.glob("*.json"))
 
 
 def read(photos: list[str], fixture: str | None = None) -> dict:
@@ -40,7 +51,7 @@ def read(photos: list[str], fixture: str | None = None) -> dict:
             validate(real)
             return real
         fixture = "creator_maya"
-    r = json.loads((FIXTURES / f"{fixture}.json").read_text(encoding="utf-8"))
+    r = json.loads(_path(fixture).read_text(encoding="utf-8"))
     r["stub"] = True                       # every consumer can see this is not a real reading
     validate(r)
     return r
@@ -62,6 +73,8 @@ def validate(r: dict) -> None:
 
 def selftest() -> None:
     assert {"creator_maya", "couple_june_and_ola"} <= set(fixtures())
+    assert sum(f.startswith("archetype-") for f in fixtures()) >= 8, "the 8 Gold archetype packs"
+    assert read([], fixture="archetype-night-shift-builder")["archetype"]["name"] == "Night-Shift Builder"
     r = read(["x.jpg"], fixture="creator_maya")
     assert r["stub"] is True and r["signature"][0]["idea"] == "hand-thrown ceramics"
     for f in fixtures():

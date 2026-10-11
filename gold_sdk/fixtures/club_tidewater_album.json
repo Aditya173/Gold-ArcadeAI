@@ -1,0 +1,31 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-club-tidewater-album",
+  "_note": "INVENTED run club's shared season album (shared by its organizer). Read with people OFF: the group path never asks for people. Not anyone's real photos.",
+  "photos": {"count": 960, "events": 64},
+  "signature": [
+    {"idea": "dawn harbour runs", "share_of_events": 0.42, "strength": 0.79, "evidence": ["ev-401", "ev-406", "ev-431"], "synonyms": ["sunrise waterfront", "harbour loop"]},
+    {"idea": "post-run coffee", "share_of_events": 0.31, "strength": 0.68, "evidence": ["ev-402", "ev-440"], "synonyms": ["cafe after the run"]},
+    {"idea": "trail switchbacks", "share_of_events": 0.22, "strength": 0.6, "evidence": ["ev-412"], "synonyms": ["hill repeats"]},
+    {"idea": "race bibs and finish lines", "share_of_events": 0.13, "strength": 0.52, "evidence": ["ev-450", "ev-463"], "synonyms": ["finish arch"]}
+  ],
+  "palette": [
+    {"name": "harbour blue", "hex": "#2e5a7a", "share": 0.27, "source": "goes_to"},
+    {"name": "fog", "hex": "#d8dcd9", "share": 0.24, "source": "goes_to"},
+    {"name": "sunrise coral", "hex": "#df7a5f", "share": 0.14, "source": "goes_to"},
+    {"name": "buoy yellow", "hex": "#e9c46a", "share": 0.11, "source": "goes_to"},
+    {"name": "asphalt", "hex": "#3a3d40", "share": 0.12, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "waterfront", "share_of_events": 0.45},
+    {"type": "cafe", "share_of_events": 0.31},
+    {"type": "mountains or trail", "share_of_events": 0.22},
+    {"type": "race or event venue", "share_of_events": 0.13}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.8, "note": "fixture value; the real SDK reports its own"},
+    "palette": {"status": "measured", "value": 0.9},
+    "places": {"status": "measured", "value": 0.77},
+    "people": {"status": "unmeasured", "note": "not requested for a club album"}
+  }
+}

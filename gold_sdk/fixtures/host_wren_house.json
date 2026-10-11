@@ -1,0 +1,135 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "fixture-host-wren-house",
+ "_note": "INVENTED short-term-rental host for development (listing photos the host owns, uploaded per room). Not a real property. Reading of all rooms together.",
+ "photos": {
+  "count": 84,
+  "events": 12
+ },
+ "signature": [
+  {
+   "idea": "warm wood and linen",
+   "share_of_events": 0.67,
+   "strength": 0.78,
+   "evidence": [
+    "ev-701",
+    "ev-704",
+    "ev-709"
+   ],
+   "synonyms": [
+    "oak and flax"
+   ]
+  },
+  {
+   "idea": "brass fittings",
+   "share_of_events": 0.42,
+   "strength": 0.64,
+   "evidence": [
+    "ev-702",
+    "ev-707"
+   ],
+   "synonyms": [
+    "brass lamps"
+   ]
+  },
+  {
+   "idea": "olive textiles",
+   "share_of_events": 0.33,
+   "strength": 0.57,
+   "evidence": [
+    "ev-705"
+   ],
+   "synonyms": [
+    "olive throws"
+   ]
+  },
+  {
+   "idea": "houseplants by the window",
+   "share_of_events": 0.25,
+   "strength": 0.5,
+   "evidence": [
+    "ev-711"
+   ],
+   "synonyms": []
+  }
+ ],
+ "palette": [
+  {
+   "name": "oat linen",
+   "hex": "#ebe3d3",
+   "share": 0.3,
+   "source": "lives_with"
+  },
+  {
+   "name": "walnut",
+   "hex": "#6b4a33",
+   "share": 0.21,
+   "source": "lives_with"
+  },
+  {
+   "name": "olive",
+   "hex": "#77784f",
+   "share": 0.15,
+   "source": "lives_with"
+  },
+  {
+   "name": "brass",
+   "hex": "#b08d57",
+   "share": 0.1,
+   "source": "lives_with"
+  },
+  {
+   "name": "rust",
+   "hex": "#a4512f",
+   "share": 0.06,
+   "source": "lives_with"
+  },
+  {
+   "name": "teal",
+   "hex": "#2f6f73",
+   "share": 0.05,
+   "source": "lives_with"
+  },
+  {
+   "name": "mustard",
+   "hex": "#c98b3a",
+   "share": 0.05,
+   "source": "lives_with"
+  },
+  {
+   "name": "charcoal",
+   "hex": "#3b3a38",
+   "share": 0.08,
+   "source": "lives_with"
+  }
+ ],
+ "places": [
+  {
+   "type": "bedroom",
+   "share_of_events": 0.33
+  },
+  {
+   "type": "living room",
+   "share_of_events": 0.33
+  },
+  {
+   "type": "loft",
+   "share_of_events": 0.33
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "measured",
+   "value": 0.7,
+   "note": "fixture value; the real SDK reports its own"
+  },
+  "palette": {
+   "status": "measured",
+   "value": 0.9
+  },
+  "places": {
+   "status": "measured",
+   "value": 0.8
+  }
+ }
+}

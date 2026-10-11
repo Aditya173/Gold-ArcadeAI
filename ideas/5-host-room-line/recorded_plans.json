@@ -1,0 +1,24 @@
+{
+ "_note": "Hand-written plans for the invented host_wren property, used when no ANTHROPIC_API_KEY is set (or --plan is not passed). Each passes planner.check against its reading (house plan: the all-rooms reading; pillows: that room's reading).",
+ "house": {
+  "store": {"name": "Wren House Line", "tagline": "One quiet look across every room", "about": "A proposed line for this property: if the host orders it, the rug and print carry the colours its rooms share, and each room gets a pillow in its own accent.", "palette": ["#ebe3d3", "#6b4a33", "#77784f", "#b08d57"]},
+  "products": [
+   {"category": "rug", "title": "House Field Rug", "prompt": "A printed flat rug, 5 x 8 ft: a wide oat-linen field with a walnut border band, one offset olive block in a corner and a thin brass line inside the border, calm geometry, low pile look, no text, no logos.", "colors": ["#ebe3d3", "#6b4a33", "#77784f", "#b08d57"], "why": "Warm wood and linen show up in 67% of the property's moments, so the rug is built on them.", "signature": ["warm wood and linen"]},
+   {"category": "wall art print", "title": "Brass and Olive", "prompt": "An abstract wall print: two overlapping soft-edged circles, one brass and one olive, on an oat-linen ground with a single walnut horizon line, matte flat colour, no text.", "colors": ["#ebe3d3", "#b08d57", "#77784f", "#6b4a33"], "why": "Brass fittings appear in 42% of the property's moments.", "signature": ["brass fittings"]}
+  ]
+ },
+ "rooms": {
+  "bedroom": {
+   "store": {"name": "Bedroom pillow", "tagline": "Rust on linen", "about": "Proposed for the bedroom: the pillow echoes the rust already on the bed, set on the house linen.", "palette": ["#a4512f", "#ebe3d3"]},
+   "products": [{"category": "throw pillow", "title": "Rust Stripe Pillow", "prompt": "A 20 x 20 in throw pillow cover: three wide rust stripes on an oat-linen ground with a thin walnut pinstripe between them, pattern kept 3 cm clear of the seams, no text.", "colors": ["#a4512f", "#ebe3d3", "#6b4a33"], "why": "Rust bedding shows up in 50% of this room's moments; the pillow echoes that rust.", "signature": ["rust bedding"]}]
+  },
+  "living": {
+   "store": {"name": "Living room pillow", "tagline": "Teal on oat", "about": "Proposed for the living room: the pillow echoes the teal sofa, with olive from the rest of the house.", "palette": ["#2f6f73", "#ebe3d3"]},
+   "products": [{"category": "throw pillow", "title": "Teal Block Pillow", "prompt": "A 20 x 20 in throw pillow cover: a large teal square offset to one corner on an oat-linen ground, a narrow olive band along one edge, pattern kept 3 cm clear of the seams, no text.", "colors": ["#2f6f73", "#ebe3d3", "#77784f"], "why": "A teal velvet sofa shows up in 75% of this room's moments; the pillow echoes that teal.", "signature": ["teal velvet sofa"]}]
+  },
+  "loft": {
+   "store": {"name": "Loft pillow", "tagline": "Mustard and charcoal", "about": "Proposed for the loft: the pillow echoes the mustard armchair, grounded in charcoal.", "palette": ["#c98b3a", "#3b3a38"]},
+   "products": [{"category": "throw pillow", "title": "Mustard Arc Pillow", "prompt": "A 20 x 20 in throw pillow cover: a single wide mustard arc on a charcoal ground with an oat-linen dot, the arc ending 3 cm before the seams, no text.", "colors": ["#c98b3a", "#3b3a38", "#ebe3d3"], "why": "The mustard armchair shows up in 50% of this room's moments; the pillow echoes that mustard.", "signature": ["mustard armchair"]}]
+  }
+ }
+}

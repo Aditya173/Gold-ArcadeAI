@@ -1,0 +1,20 @@
+{
+ "_note": "Hand-written recorded plan for the invented diner_theo reading. Used when there is no ANTHROPIC_API_KEY (or no --plan). Must pass planner.check.",
+ "store": {"name": "Second Helpings", "tagline": "Goods from the tables you keep returning to",
+           "about": "Your roll is full of fresh pasta, a quick espresso standing up, and fruit from the market. These pieces bring that table home.",
+           "palette": ["#c8442f", "#e9e1d3", "#3a2a22", "#e8c95a", "#5b7a4a"]},
+ "products": [
+  {"category": "textile", "for": "self+gift", "title": "Pasta Board Tea Towel",
+   "prompt": "Printed cotton tea towel, 18x28 in: a loose repeat of pasta shapes (ribbons, shells, twists) in tomato and basil on a linen ground, flat shapes at least 3 cm. Flat print, hemmed edges, no text.",
+   "colors": ["#c8442f", "#5b7a4a", "#e9e1d3"], "why": "Hand-made pasta is in 31% of your moments.", "signature": ["hand-made pasta"]},
+  {"category": "wall art print", "for": "gift", "title": "Counter Espresso Print",
+   "prompt": "Wall art print, 11x14 in, matte paper: a single espresso cup and saucer seen from above as flat shapes in espresso brown and linen on a lemon ground, wide margins. No text.",
+   "colors": ["#3a2a22", "#e9e1d3", "#e8c95a"], "why": "Espresso at the counter shows up in 27% of your moments.", "signature": ["espresso at the counter"]},
+  {"category": "throw pillow", "for": "self", "title": "Market Fruit Pillow",
+   "prompt": "Printed throw pillow, 18x18 in: a scattered pattern of lemons and halved figs in lemon, tomato and basil on linen, motifs at least 5 cm. Flat print, hidden zip, no text.",
+   "colors": ["#e8c95a", "#c8442f", "#5b7a4a", "#e9e1d3"], "why": "Market fruit stalls are in 18% of your moments.", "signature": ["market fruit stalls"]},
+  {"category": "ceramic", "for": "gift", "title": "Taco Night Plate",
+   "prompt": "Decorative ceramic plate, 9 in, for display: a bold ring of folded taco shapes around the rim in tomato, lemon and basil on a linen ground. No text.",
+   "colors": ["#c8442f", "#e8c95a", "#5b7a4a", "#e9e1d3"], "why": "Street tacos are in 22% of your moments; a display plate until the maker confirms it is food-safe.", "signature": ["street tacos"]}
+ ]
+}

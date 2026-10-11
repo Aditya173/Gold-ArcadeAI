@@ -1,0 +1,165 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-night-shift-builder",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Night-Shift Builder",
+  "one_line": "The real day starts after dark, alone, on something self-assigned.",
+  "reads": {
+   "rhythms": "Their productive block opens when everyone else's day closes, so momentum and replies arrive after ten and mornings are slow and negotiable.",
+   "life_phases": "A change of address or role barely dents them, because the setup that matters is portable — a desk, a screen, the quiet hours — and each new phase gets a project poured into it."
+  },
+  "title_phrasings": [
+   "Does the real work once the house is quiet",
+   "Keeps a build running past midnight",
+   "Eats beside the open laptop",
+   "Treats the late block as the working day",
+   "Starts slow, finishes long after dinner"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "late desk sessions",
+   "share_of_events": 0.45,
+   "strength": 0.85,
+   "synonyms": [
+    "midnight desk",
+    "lamp-lit workspace"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "laptop dinners",
+   "share_of_events": 0.3,
+   "strength": 0.8,
+   "synonyms": [
+    "meal beside laptop",
+    "dinner at keyboard"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "code on screen",
+   "share_of_events": 0.35,
+   "strength": 0.75,
+   "synonyms": [
+    "terminal window",
+    "editor screenshot"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "dark window behind monitor",
+   "share_of_events": 0.2,
+   "strength": 0.65,
+   "synonyms": [
+    "night outside window"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "mug by keyboard",
+   "share_of_events": 0.25,
+   "strength": 0.6,
+   "synonyms": [
+    "late cup of coffee"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "slow morning counter",
+   "share_of_events": 0.12,
+   "strength": 0.5,
+   "synonyms": [
+    "late breakfast kitchen"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "night navy",
+   "hex": "#141c2e",
+   "share": 0.3,
+   "source": "lives_with"
+  },
+  {
+   "name": "monitor blue",
+   "hex": "#3a6ea5",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "desk lamp amber",
+   "hex": "#e0a040",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "screen white",
+   "hex": "#e8ecf2",
+   "share": 0.15,
+   "source": "saves"
+  },
+  {
+   "name": "counter grey",
+   "hex": "#8a8f96",
+   "share": 0.1,
+   "source": "lives_with"
+  }
+ ],
+ "places": [
+  {
+   "type": "desk",
+   "share_of_events": 0.45
+  },
+  {
+   "type": "phone screen",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "kitchen counter",
+   "share_of_events": 0.15
+  },
+  {
+   "type": "dining table",
+   "share_of_events": 0.12
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

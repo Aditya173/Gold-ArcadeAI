@@ -1,0 +1,28 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-traveller-noor-trip-b",
+  "_note": "INVENTED reading of one invented trip's photos (the traveller_noor Edinburgh trip). Not anyone's real photos.",
+  "photos": {"count": 96, "events": 6},
+  "signature": [
+    {"idea": "stone stairways and closes", "share_of_events": 0.5, "strength": 0.77, "evidence": ["ev-611", "ev-614"], "synonyms": ["narrow lanes"]},
+    {"idea": "moorland walks", "share_of_events": 0.33, "strength": 0.66, "evidence": ["ev-613"], "synonyms": ["heather hills"]},
+    {"idea": "wet cobbles", "share_of_events": 0.33, "strength": 0.58, "evidence": ["ev-612"], "synonyms": ["rain on stone"]},
+    {"idea": "bookshop windows", "share_of_events": 0.17, "strength": 0.49, "evidence": ["ev-615"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "granite", "hex": "#6e6a66", "share": 0.31, "source": "goes_to"},
+    {"name": "sandstone", "hex": "#c9b28f", "share": 0.23, "source": "goes_to"},
+    {"name": "heather", "hex": "#8a6a8c", "share": 0.16, "source": "goes_to"},
+    {"name": "moss", "hex": "#5d6b45", "share": 0.15, "source": "goes_to"},
+    {"name": "slate blue", "hex": "#4f6275", "share": 0.1, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "street or city", "share_of_events": 0.67},
+    {"type": "mountains or trail", "share_of_events": 0.33}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.64, "note": "fixture value; six moments is a thin trip"},
+    "palette": {"status": "measured", "value": 0.86},
+    "places": {"status": "measured", "value": 0.74}
+  }
+}

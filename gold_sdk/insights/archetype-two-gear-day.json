@@ -1,0 +1,170 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-two-gear-day",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Two-Gear Day",
+  "one_line": "Daylight handled solo and low-key; the night handed over to company, volume and one more stop.",
+  "reads": {
+   "rhythms": "The afternoon does the restoring and the night does the spending, which means a daytime invitation competes with something that is quietly doing real work for them.",
+   "life_phases": "The two-part day travels intact through moves and new terms, so they are functional in a new city within a week and rebuild the social half within a month."
+  },
+  "title_phrasings": [
+   "Eats alone by day, goes out after dark",
+   "Turns one dinner into three addresses",
+   "Gets a second wind when the room fills",
+   "Keeps the quiet half quiet",
+   "Walks between places instead of riding"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "solo lunch table",
+   "share_of_events": 0.3,
+   "strength": 0.8,
+   "synonyms": [
+    "table for one",
+    "quiet daytime meal"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "crowded night bar",
+   "share_of_events": 0.35,
+   "strength": 0.85,
+   "synonyms": [
+    "packed room",
+    "late drinks"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "café window afternoon",
+   "share_of_events": 0.25,
+   "strength": 0.7,
+   "synonyms": [
+    "daytime coffee alone"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "waterfront night walk",
+   "share_of_events": 0.25,
+   "strength": 0.75,
+   "synonyms": [
+    "lit promenade",
+    "river at night"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "group dinner table",
+   "share_of_events": 0.25,
+   "strength": 0.7,
+   "synonyms": [
+    "friends around plates"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "neon street at night",
+   "share_of_events": 0.2,
+   "strength": 0.65,
+   "synonyms": [
+    "lit signs",
+    "night pavement"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "night water blue",
+   "hex": "#1b2a44",
+   "share": 0.25,
+   "source": "goes_to"
+  },
+  {
+   "name": "afternoon daylight",
+   "hex": "#f3e7c9",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "café wood brown",
+   "hex": "#8a5a3b",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "bar red",
+   "hex": "#b0303a",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "neon magenta",
+   "hex": "#d43f9a",
+   "share": 0.15,
+   "source": "goes_to"
+  }
+ ],
+ "places": [
+  {
+   "type": "restaurant",
+   "share_of_events": 0.35
+  },
+  {
+   "type": "café",
+   "share_of_events": 0.25
+  },
+  {
+   "type": "bar",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "waterfront",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "phone screen",
+   "share_of_events": 0.15
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

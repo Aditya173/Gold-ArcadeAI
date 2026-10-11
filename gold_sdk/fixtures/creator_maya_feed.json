@@ -1,0 +1,32 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-creator-maya-feed",
+  "_note": "INVENTED creator for development: the same invented person as creator_maya, read from a small curated feed instead of a camera roll. Not a reading of anyone's photos.",
+  "photos": {"count": 84, "events": 84},
+  "signature": [
+    {"idea": "glazed stoneware close-ups", "share_of_events": 0.36, "strength": 0.58, "evidence": ["ev-201", "ev-214"], "synonyms": ["glaze detail"]},
+    {"idea": "styled coffee flat-lays", "share_of_events": 0.31, "strength": 0.52, "evidence": ["ev-203", "ev-231"], "synonyms": ["coffee still life"]},
+    {"idea": "linen and natural textures", "share_of_events": 0.22, "strength": 0.44, "evidence": ["ev-240"], "synonyms": []},
+    {"idea": "dried flowers", "share_of_events": 0.17, "strength": 0.4, "evidence": ["ev-252"], "synonyms": ["pressed botanicals"]}
+  ],
+  "palette": [
+    {"name": "warm cream", "hex": "#efe4d2", "share": 0.34, "source": "lives_with"},
+    {"name": "terracotta", "hex": "#c0704f", "share": 0.24, "source": "lives_with"},
+    {"name": "sage", "hex": "#a3b09a", "share": 0.16, "source": "goes_to"},
+    {"name": "espresso", "hex": "#3b2f2a", "share": 0.14, "source": "lives_with"},
+    {"name": "sea mist", "hex": "#c9d6d3", "share": 0.08, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "cafe", "share_of_events": 0.4},
+    {"type": "studio or workshop", "share_of_events": 0.33},
+    {"type": "home interior", "share_of_events": 0.29},
+    {"type": "beach or coast", "share_of_events": 0.12}
+  ],
+  "reliability": {
+    "signature": {"status": "unmeasured", "note": "fixture: a curated set this small is not yet measured; a feed's look is partly its editing preset"},
+    "palette": {"status": "measured", "value": 0.9, "note": "fixture value; these are the feed's colours, not the colours of the person's days"},
+    "places": {"status": "measured", "value": 0.78},
+    "named_places": {"status": "unmeasured"},
+    "people": {"status": "unmeasured"}
+  }
+}

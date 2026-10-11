@@ -1,0 +1,170 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-grid-keeper",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Grid Keeper",
+  "one_line": "Runs several tracked commitments at once and settles the dull parts well ahead of the deadline.",
+  "reads": {
+   "rhythms": "The week is built in advance against fixed anchors — terms, deadlines, logged hours, race dates — so they are dependable inside a slot and vaguer about anything with no date attached.",
+   "life_phases": "A transition is handled as admin: forms filed, gear lined up, the next step researched before it is announced, which makes a big change look abrupt from outside and rehearsed from inside."
+  },
+  "title_phrasings": [
+   "Books the week before the week arrives",
+   "Clears the paperwork in one sitting",
+   "Runs three tracks without dropping one",
+   "Reads the rules before committing",
+   "Keeps score on their own output"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "filled weekly planner",
+   "share_of_events": 0.35,
+   "strength": 0.85,
+   "synonyms": [
+    "calendar screenshot",
+    "colour-coded schedule"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "paperwork spread on table",
+   "share_of_events": 0.25,
+   "strength": 0.75,
+   "synonyms": [
+    "stacked forms",
+    "signed documents"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "race gear laid out",
+   "share_of_events": 0.2,
+   "strength": 0.7,
+   "synonyms": [
+    "kit lined up",
+    "race bib"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "progress chart on screen",
+   "share_of_events": 0.3,
+   "strength": 0.75,
+   "synonyms": [
+    "tracking app screenshot",
+    "logged hours"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "printed rules reading",
+   "share_of_events": 0.15,
+   "strength": 0.6,
+   "synonyms": [
+    "highlighted guidelines"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "early street commute",
+   "share_of_events": 0.15,
+   "strength": 0.55,
+   "synonyms": [
+    "morning pavement"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "paper white",
+   "hex": "#f4f2ec",
+   "share": 0.25,
+   "source": "saves"
+  },
+  {
+   "name": "spreadsheet green",
+   "hex": "#3f8f5a",
+   "share": 0.2,
+   "source": "saves"
+  },
+  {
+   "name": "office grey",
+   "hex": "#9aa0a6",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "ink navy",
+   "hex": "#23305a",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "signal orange",
+   "hex": "#e8762b",
+   "share": 0.15,
+   "source": "goes_to"
+  }
+ ],
+ "places": [
+  {
+   "type": "phone screen",
+   "share_of_events": 0.35
+  },
+  {
+   "type": "home office",
+   "share_of_events": 0.3
+  },
+  {
+   "type": "kitchen table",
+   "share_of_events": 0.15
+  },
+  {
+   "type": "city street",
+   "share_of_events": 0.15
+  },
+  {
+   "type": "restaurant",
+   "share_of_events": 0.1
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

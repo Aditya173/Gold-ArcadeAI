@@ -1,0 +1,26 @@
+{
+ "_note": "Hand-written recorded plan for the invented creator_maya_feed reading. Used when there is no ANTHROPIC_API_KEY (or no --plan). Must pass planner.check.",
+ "store": {"name": "Kiln and Crema", "tagline": "Pieces from a feed of clay and coffee",
+           "about": "Your feed lives between the café table and the studio bench. These pieces carry its warm cream and terracotta, with a little sea air at the edges.",
+           "palette": ["#efe4d2", "#c0704f", "#a3b09a", "#3b2f2a"]},
+ "products": [
+  {"category": "pendant necklace", "title": "Studio Disc Pendant",
+   "prompt": "Pendant necklace in sterling silver: a 20 mm softly domed disc with an off-centre thumbprint hollow, like the base of a thrown cup, brushed matte finish, on an 18 in cable chain. No stones, no engraving, no text.",
+   "colors": [], "why": "Your posts are set in a studio or workshop 33% of the time; this is a maker's mark in metal.", "signature": []},
+  {"category": "earrings", "title": "Tide Line Studs",
+   "prompt": "Earrings in sterling silver: a pair of 12 mm studs, each a thin arc with a hammered texture like a wave line on wet sand, satin finish, butterfly backs. No stones, no text.",
+   "colors": [], "why": "The coast shows up in 12% of your posts, a small but steady note.", "signature": []},
+  {"category": "rug", "title": "Café Floor Rug",
+   "prompt": "Printed area rug, 5x8 ft, low pile: a quiet grid of large terracotta and cream squares offset like an old café floor, each square at least 6 inches, with a thin espresso border. Flat printed pattern, no fringe, no text.",
+   "colors": ["#efe4d2", "#c0704f", "#3b2f2a"], "why": "Cafés are the setting of 40% of your posts.", "signature": []},
+  {"category": "throw pillow", "title": "Linen Room Pillow",
+   "prompt": "Printed throw pillow, 18x18 in: broad soft stripes of cream, sage and sea mist, like morning light across a bed, with one fine terracotta line. Flat print, hidden zip, no text.",
+   "colors": ["#efe4d2", "#a3b09a", "#c9d6d3", "#c0704f"], "why": "Home interiors are 29% of your posts.", "signature": []},
+  {"category": "wall art print", "title": "Glaze Study Print",
+   "prompt": "Wall art print, 12x16 in, matte paper: an abstract study of three overlapping glaze pools in terracotta, sage and cream on a warm ground, soft edges, generous margins. No text, no signature.",
+   "colors": ["#c0704f", "#a3b09a", "#efe4d2", "#3b2f2a"], "why": "Cafés frame 40% of your posts and studio work 33%; the print sits between them.", "signature": []},
+  {"category": "ceramic", "title": "Cream Rim Plate",
+   "prompt": "Decorative ceramic plate, 10 in, for display: a cream ground with a hand-drawn terracotta rim band and a small espresso dot pattern near the edge. No text.",
+   "colors": ["#efe4d2", "#c0704f", "#3b2f2a"], "why": "Studio or workshop scenes are 33% of your posts.", "signature": []}
+ ]
+}

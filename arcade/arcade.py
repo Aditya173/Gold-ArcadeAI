@@ -1,6 +1,6 @@
 """arcade.py -- the smallest Arcade platform client this project needs.
 
-Spec: tools/arcade/openapi.json (docs.arcade.ai); rules: .claude/skills/arcade-api*/SKILL.md.
+Spec: arcade/openapi.json (docs.arcade.ai); rules: .claude/skills/arcade-api*/SKILL.md.
 
   every call      POST https://platform.arcade.ai/v1/<procedure>, JSON body, bearer key
   key             ARCADE_API_KEY from the environment or <repo>/.env; never argv, never logged
@@ -9,9 +9,9 @@ Spec: tools/arcade/openapi.json (docs.arcade.ai); rules: .claude/skills/arcade-a
   NOT HERE        checkouts/* and orders/* -- paying places a real order; a human does that in
                   Studio. The client refuses those procedures outright.
 
-  python tools/arcade/arcade.py --selftest           fake transport, no network, no key
-  python tools/arcade/arcade.py categories            live: list categories (needs the key)
-  python tools/arcade/arcade.py categories --save     ...and write tools/arcade/categories_live.json,
+  python arcade/arcade.py --selftest           fake transport, no network, no key
+  python arcade/arcade.py categories            live: list categories (needs the key)
+  python arcade/arcade.py categories --save     ...and write arcade/categories_live.json,
                                                       which the mock then uses instead of the fixture
 """
 from __future__ import annotations
@@ -76,7 +76,7 @@ class Arcade:
         # refused unless ARCADE_LIVE=1. Fakes/mocks (any other transport) are always allowed.
         if transport is _http and os.environ.get("ARCADE_LIVE") != "1":
             raise SystemExit("Arcade API is OFF until the hackathon: set ARCADE_LIVE=1 to call platform.arcade.ai "
-                             "(use the mock transport -- tools/arcade/mock_arcade.py -- before then)")
+                             "(use the mock transport -- arcade/mock_arcade.py -- before then)")
         self.key = key or load_key()
         if not self.key or not self.key.startswith("arcade_sk_live_"):
             raise SystemExit("ARCADE_API_KEY missing or not an arcade_sk_live_ key "
@@ -118,8 +118,15 @@ class Arcade:
         items = self.call("categories/list")["items"]
         return [c for c in items if world is None or c["world"] == world]
 
+    def reference(self, media_type: str, byte_length: int, request_id: str) -> str:
+        """createUpload -> (the caller PUTs the bytes to uploadUrl) -> create; returns a referenceId.
+        Print designs only: jewelry refuses referenceIds."""
+        up = self.call("references/createUpload", {"requestId": request_id + "-u", "mediaType": media_type,
+                                                    "byteLength": byte_length})
+        return self.call("references/create", {"requestId": request_id + "-c", "uploadId": up["uploadId"]})["referenceId"]
+
     def design(self, prompt: str, category_id: str, colors: list[str] | None = None,
-               request_id: str | None = None) -> dict:
+               request_id: str | None = None, reference_ids: list[str] | None = None) -> dict:
         """patterns/create with a category -> wait -> products/get. Returns one flat record:
         ok + product (title, selections, unitPrice, images, maker) or ok=False + the reason
         (a failed job's reason is the manufacturability signal: no maker could price it)."""
@@ -127,6 +134,8 @@ class Arcade:
                 "categoryId": category_id}
         if colors:                      # print only; jewelry refuses colors
             body["colors"] = colors[:10]
+        if reference_ids:               # print only; jewelry refuses referenceIds
+            body["referenceIds"] = reference_ids[:3]
         try:
             job = self.call("patterns/create", body)
         except ArcadeError as e:        # 400 = prompt/category mismatch, no job, no credits

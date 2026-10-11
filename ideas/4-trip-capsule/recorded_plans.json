@@ -1,0 +1,17 @@
+{
+ "_note": "Hand-written plans for the invented traveller_noor trips, used when no ANTHROPIC_API_KEY is set (or --plan is not passed). Each passes planner.check against its trip reading.",
+ "oaxaca": {
+  "store": {"name": "Oaxaca, March", "tagline": "Market cloth and lime-washed courtyards", "about": "Your week away kept returning to market stalls and terracotta courtyards. These two pieces carry that trip's colours home, as pattern rather than postcard.", "palette": ["#efe6d6", "#b5573a", "#e3a33b", "#7d9a83", "#2f4f8f"]},
+  "products": [
+   {"category": "wall art print", "title": "Courtyard Arches", "prompt": "An abstract wall print of stacked rounded arches in terracotta and marigold on a lime-wash ground, flat colour blocks, a thin cobalt line inside each arch, generous margins, no text, no figures, no landmarks.", "colors": ["#efe6d6", "#b5573a", "#e3a33b", "#2f4f8f"], "why": "Terracotta courtyards show up in 36% of this trip's moments.", "signature": ["terracotta courtyards"]},
+   {"category": "textile", "title": "Market Stripe", "prompt": "A repeating stripe pattern of narrow bands of irregular width in marigold, agave green and terracotta on lime-wash, like stacked cloth on a market stall, crisp edges, no text, no logos.", "colors": ["#efe6d6", "#e3a33b", "#7d9a83", "#b5573a"], "why": "Market stalls with woven goods are in 45% of this trip's moments.", "signature": ["market stalls with woven goods"]}
+  ]
+ },
+ "edinburgh": {
+  "store": {"name": "Edinburgh, May", "tagline": "Stone stairs and heather hills", "about": "Half of this short trip was spent on stone stairways and narrow closes, and a third out on the moors. The pieces keep that grey-and-heather mood.", "palette": ["#6e6a66", "#c9b28f", "#8a6a8c", "#5d6b45", "#4f6275"]},
+  "products": [
+   {"category": "wall art print", "title": "Close and Stair", "prompt": "An abstract wall print of interlocking stair-step blocks in granite grey and sandstone, one narrow slate-blue band climbing through the middle, matte flat colour, no text, no buildings drawn literally, no landmarks.", "colors": ["#6e6a66", "#c9b28f", "#4f6275"], "why": "Stone stairways and closes show up in 50% of this trip's moments.", "signature": ["stone stairways and closes"]},
+   {"category": "textile", "title": "Moor Check", "prompt": "A soft check pattern in heather purple and moss green over sandstone, wide uneven squares like a hillside seen from above, no text, no logos.", "colors": ["#c9b28f", "#8a6a8c", "#5d6b45"], "why": "Moorland walks are in 33% of this trip's moments.", "signature": ["moorland walks"]}
+  ]
+ }
+}

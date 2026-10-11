@@ -45,7 +45,10 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
         if BINARY.search(p):
             continue
         text = read(p)
-        for t in terms:
+        # generated dependency lock files list third-party package names ("decoder", ...), not our
+        # content: secrets are still checked, deny terms are not
+        lock = p.endswith(("package-lock.json", "yarn.lock", "pnpm-lock.yaml"))
+        for t in ([] if lock else terms):
             for m in t.finditer(text):
                 line = text.count("\n", 0, m.start()) + 1
                 bad.append(f"{p}:{line}: deny term /{t.pattern}/ -> {m.group(0)!r}")
@@ -59,12 +62,12 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
 def selftest() -> None:
     terms = [re.compile("secretplace", re.I)]
     docs = {"a.md": "fine", "b.md": "we went to SecretPlace", "c.jpg": "", "d.md": "key sk-ant-" + "x" * 30,
-            "storefront-app/assets/icon.png": ""}
+            "storefront-app/assets/icon.png": "", "x/package-lock.json": "secretplace-decoder"}
     bad = scan(list(docs), terms, read=lambda p: docs[p])
     assert any(b.startswith("b.md:1") for b in bad) and any(b.startswith("c.jpg") for b in bad)
     assert any(b.startswith("d.md") and "secret" in b for b in bad)
-    assert not any(b.startswith(("a.md", "storefront-app/assets")) for b in bad), bad
-    print("leak_scan selftest: 4 checks PASS")
+    assert not any(b.startswith(("a.md", "storefront-app/assets", "x/package-lock.json")) for b in bad), bad
+    print("leak_scan selftest: 5 checks PASS")
 
 
 def main() -> int:

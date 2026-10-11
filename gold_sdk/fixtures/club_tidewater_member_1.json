@@ -1,0 +1,27 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-club-tidewater-member-1",
+  "_note": "INVENTED reading of only the album events one opted-in member tagged themself into (anonymous ref person-1). No face matching was used to find them. Not anyone's real photos.",
+  "photos": {"count": 132, "events": 9},
+  "signature": [
+    {"idea": "trail switchbacks", "share_of_events": 0.56, "strength": 0.74, "evidence": ["ev-412", "ev-415", "ev-427"], "synonyms": ["hill repeats"]},
+    {"idea": "race bibs and finish lines", "share_of_events": 0.33, "strength": 0.61, "evidence": ["ev-450", "ev-463"], "synonyms": ["finish arch"]},
+    {"idea": "dawn harbour runs", "share_of_events": 0.22, "strength": 0.5, "evidence": ["ev-406"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "pine", "hex": "#3f5e4a", "share": 0.29, "source": "goes_to"},
+    {"name": "fog", "hex": "#d8dcd9", "share": 0.22, "source": "goes_to"},
+    {"name": "harbour blue", "hex": "#2e5a7a", "share": 0.18, "source": "goes_to"},
+    {"name": "sunrise coral", "hex": "#df7a5f", "share": 0.1, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "mountains or trail", "share_of_events": 0.56},
+    {"type": "race or event venue", "share_of_events": 0.33},
+    {"type": "waterfront", "share_of_events": 0.22}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.62, "note": "fixture value; nine moments is a thin slice"},
+    "palette": {"status": "measured", "value": 0.85},
+    "places": {"status": "measured", "value": 0.75}
+  }
+}

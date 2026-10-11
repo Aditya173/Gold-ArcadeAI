@@ -1,0 +1,42 @@
+{
+  "schema": "brand.kit.v0",
+  "_note": "INVENTED creator brand for development.",
+  "creatorId": "creator-tide-and-clay",
+  "name": "Tide & Clay",
+  "handle": "tideandclay",
+  "voice": "warm, unhurried, a little salty",
+  "palette": [
+    {"name": "oat", "hex": "#e8dcc6", "role": "neutral"},
+    {"name": "clay", "hex": "#b8714a", "role": "primary"},
+    {"name": "sea glass", "hex": "#9fb8ad", "role": "primary"},
+    {"name": "charcoal", "hex": "#2f2c2a", "role": "neutral"},
+    {"name": "kelp", "hex": "#5f6b3c", "role": "accent"}
+  ],
+  "motifs": ["the wave-and-wheel mark", "thrown-ring stripes", "a tide-line edge"],
+  "assets": [
+    {"assetId": "logo", "kind": "logo", "mediaType": "image/png", "byteLength": 48211, "describe": "a circle made of one thrown clay ring with a single wave crossing it"},
+    {"assetId": "pattern-rings", "kind": "pattern", "mediaType": "image/png", "byteLength": 91233, "describe": "concentric throwing-ring stripes, slightly uneven, clay on oat"},
+    {"assetId": "pattern-tide", "kind": "pattern", "mediaType": "image/png", "byteLength": 77410, "describe": "a soft repeating tide-line edge in sea glass"}
+  ],
+  "templates": [
+    {"templateId": "tc-print", "category": "wall art print", "world": "print",
+     "brief": "A {size} wall print: {brand_element} framing {fan_motif}. Flat colour, purely graphic, no faces.",
+     "required_brand_element": ["thrown-ring stripes", "the wave-and-wheel mark", "a tide-line edge"],
+     "uses_assets": ["pattern-rings", "logo"], "slots": {"size": ["12x16 in", "18x24 in"]}},
+    {"templateId": "tc-pillow", "category": "throw pillow", "world": "print",
+     "brief": "An 18 in throw pillow cover printed with {brand_element} and a small {fan_motif} detail in one corner.",
+     "required_brand_element": ["thrown-ring stripes", "a tide-line edge"],
+     "uses_assets": ["pattern-tide"], "slots": {}},
+    {"templateId": "tc-pendant", "category": "pendant necklace", "world": "jewelry",
+     "brief": "A {metal} pendant in the shape of the wave-and-wheel mark (a ring crossed by one wave), with a small engraved {fan_motif} on the back. No stones, purely graphic.",
+     "required_brand_element": ["wave-and-wheel mark"],
+     "uses_assets": [], "slots": {"metal": ["sterling silver", "14k yellow gold"]}}
+  ],
+  "rules": {
+    "min_brand_colors": 2,
+    "fan_accent_colors": 1,
+    "forbidden_words": ["logo", "trademark", "text", "letters", "photo of"],
+    "royalty_pct": 15,
+    "public_tag_requires_opt_in": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "fixture-host-wren-room-2",
+ "_note": "INVENTED short-term-rental host for development (listing photos the host owns, uploaded per room). Not a real property. Reading of one room (living room).",
+ "photos": {
+  "count": 30,
+  "events": 4
+ },
+ "signature": [
+  {
+   "idea": "teal velvet sofa",
+   "share_of_events": 0.75,
+   "strength": 0.74,
+   "evidence": [
+    "ev-731",
+    "ev-732"
+   ],
+   "synonyms": [
+    "teal sofa"
+   ]
+  },
+  {
+   "idea": "olive textiles",
+   "share_of_events": 0.5,
+   "strength": 0.6,
+   "evidence": [
+    "ev-733"
+   ],
+   "synonyms": []
+  },
+  {
+   "idea": "houseplants by the window",
+   "share_of_events": 0.25,
+   "strength": 0.45,
+   "evidence": [
+    "ev-734"
+   ],
+   "synonyms": []
+  }
+ ],
+ "palette": [
+  {
+   "name": "oat linen",
+   "hex": "#ebe3d3",
+   "share": 0.28,
+   "source": "lives_with"
+  },
+  {
+   "name": "walnut",
+   "hex": "#6b4a33",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "olive",
+   "hex": "#77784f",
+   "share": 0.18,
+   "source": "lives_with"
+  },
+  {
+   "name": "teal",
+   "hex": "#2f6f73",
+   "share": 0.11,
+   "source": "lives_with"
+  },
+  {
+   "name": "brass",
+   "hex": "#b08d57",
+   "share": 0.08,
+   "source": "lives_with"
+  }
+ ],
+ "places": [
+  {
+   "type": "living room",
+   "share_of_events": 1.0
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "measured",
+   "value": 0.7,
+   "note": "fixture value; the real SDK reports its own"
+  },
+  "palette": {
+   "status": "measured",
+   "value": 0.9
+  },
+  "places": {
+   "status": "measured",
+   "value": 0.8
+  }
+ }
+}

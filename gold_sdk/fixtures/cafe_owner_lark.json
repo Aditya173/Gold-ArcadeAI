@@ -1,0 +1,31 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-cafe-owner-lark",
+  "_note": "INVENTED cafe owner for development: a deliberate shoot of one room (floor, shelves, counter, crockery) over several visits. Not a reading of anyone's photos.",
+  "photos": {"count": 30, "events": 12},
+  "signature": [
+    {"idea": "terracotta floor tile", "share_of_events": 0.75, "strength": 0.82, "evidence": ["ev-301", "ev-305"], "synonyms": ["hexagon tile"]},
+    {"idea": "open shelves of stoneware", "share_of_events": 0.58, "strength": 0.71, "evidence": ["ev-302", "ev-309"], "synonyms": ["cup shelf"]},
+    {"idea": "bentwood chairs", "share_of_events": 0.5, "strength": 0.66, "evidence": ["ev-304"], "synonyms": ["cafe chairs"]},
+    {"idea": "tall windows and morning light", "share_of_events": 0.33, "strength": 0.57, "evidence": ["ev-307"], "synonyms": ["arched windows"]},
+    {"idea": "zinc counter", "share_of_events": 0.25, "strength": 0.49, "evidence": ["ev-311"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "terracotta", "hex": "#b5603f", "share": 0.29, "source": "lives_with"},
+    {"name": "limewash white", "hex": "#ece6dc", "share": 0.27, "source": "lives_with"},
+    {"name": "oak", "hex": "#a07a52", "share": 0.18, "source": "lives_with"},
+    {"name": "zinc grey", "hex": "#8a8d8f", "share": 0.14, "source": "lives_with"},
+    {"name": "olive", "hex": "#6f7445", "share": 0.09, "source": "lives_with"}
+  ],
+  "places": [
+    {"type": "cafe", "share_of_events": 0.92},
+    {"type": "street or city", "share_of_events": 0.17}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.7, "note": "fixture value; the real SDK reports its own"},
+    "palette": {"status": "measured", "value": 0.85},
+    "places": {"status": "measured", "value": 0.8},
+    "named_places": {"status": "unmeasured"},
+    "people": {"status": "unmeasured"}
+  }
+}

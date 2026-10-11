@@ -1,0 +1,20 @@
+{
+ "_note": "Hand-written recorded plan for the invented couple_june_and_ola reading. Used when there is no ANTHROPIC_API_KEY (or no --plan). Must pass planner.check.",
+ "store": {"name": "Long Table", "tagline": "Keepsakes from the photos you share",
+           "about": "Your two rolls meet at long dinners, on mountain trails and on rooftops at dusk. These pieces keep those moments in the colours you both photograph.",
+           "palette": ["#3d5a45", "#e9b872", "#6b3a55", "#a8a29a"]},
+ "products": [
+  {"category": "pendant necklace", "title": "Two Trails Pendant",
+   "prompt": "Pendant necklace in sterling silver: a 20 mm disc with an engraved line that climbs and dips like a trail profile, one polished dot on the line, satin face, on an 18 in cable chain. No stones, no text.",
+   "colors": [], "why": "Mountain hikes are in 26% of your moments together; one design, ordered as a matching pair.", "signature": ["mountain hikes"]},
+  {"category": "rug", "title": "Long Table Rug",
+   "prompt": "Printed area rug, 5x8 ft, low pile: a long candle-gold band down the centre on a deep forest ground, with small plum ovals along it like plates on a table, shapes at least 6 inches. Flat printed pattern, no fringe, no text.",
+   "colors": ["#3d5a45", "#e9b872", "#6b3a55"], "why": "Long dinners with friends are in 34% of your moments, the strongest idea in your photos.", "signature": ["long dinners with friends"]},
+  {"category": "wall art print", "title": "Rooftop Hour Print",
+   "prompt": "Wall art print, 12x16 in, matte paper: stacked flat rooftops in stone and forest under a wide candle-gold sky, simple shapes, wide margins. No text, no landmarks.",
+   "colors": ["#a8a29a", "#3d5a45", "#e9b872"], "why": "Sunset rooftops are in 15% of your moments.", "signature": ["sunset rooftops"]},
+  {"category": "throw pillow", "title": "Thrift Find Pillow",
+   "prompt": "Printed throw pillow, 18x18 in: a mismatched patchwork of small vintage-style florals and checks in plum, stone and candle-gold. Flat print, hidden zip, no text.",
+   "colors": ["#6b3a55", "#a8a29a", "#e9b872"], "why": "Vintage shops show up in 17% of your moments.", "signature": ["vintage shops"]}
+ ]
+}

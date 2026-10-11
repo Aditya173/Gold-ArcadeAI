@@ -1,0 +1,170 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-same-order-regular",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Same-Order Regular",
+  "one_line": "Keeps a short list of places, orders and hours that work, and varies inside them rather than replacing them.",
+  "reads": {
+   "rhythms": "Ordinary days run on defaults to save the deciding for what matters, with one loaded evening or day carrying most of the week's spending.",
+   "life_phases": "A move or a new term changes the backdrop more than the day, because continuity is carried in small portable rituals rather than in an address."
+  },
+  "title_phrasings": [
+   "Orders the same thing at the same table",
+   "Saves the week's energy for one night",
+   "Keeps the daily settings fixed",
+   "Goes back to the seat that worked",
+   "Reads the room before the menu"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "same dish again",
+   "share_of_events": 0.4,
+   "strength": 0.85,
+   "synonyms": [
+    "usual order",
+    "repeat plate"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "favourite corner table",
+   "share_of_events": 0.3,
+   "strength": 0.8,
+   "synonyms": [
+    "regular seat",
+    "window seat again"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "one big night out",
+   "share_of_events": 0.2,
+   "strength": 0.7,
+   "synonyms": [
+    "loaded evening",
+    "dressed-up dinner"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "fixed desk setup",
+   "share_of_events": 0.2,
+   "strength": 0.65,
+   "synonyms": [
+    "same workspace",
+    "tidy desk"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "menu on table",
+   "share_of_events": 0.15,
+   "strength": 0.6,
+   "synonyms": [
+    "open menu"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "dashboard commute view",
+   "share_of_events": 0.15,
+   "strength": 0.55,
+   "synonyms": [
+    "drive through downtown"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "diner wood brown",
+   "hex": "#7b5236",
+   "share": 0.25,
+   "source": "goes_to"
+  },
+  {
+   "name": "table cream",
+   "hex": "#ede4d2",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "desk grey",
+   "hex": "#7f848a",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "evening burgundy",
+   "hex": "#6e2a35",
+   "share": 0.2,
+   "source": "goes_to"
+  },
+  {
+   "name": "warm lamp yellow",
+   "hex": "#e6b44c",
+   "share": 0.15,
+   "source": "goes_to"
+  }
+ ],
+ "places": [
+  {
+   "type": "restaurant",
+   "share_of_events": 0.45
+  },
+  {
+   "type": "workspace",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "kitchen",
+   "share_of_events": 0.12
+  },
+  {
+   "type": "downtown street",
+   "share_of_events": 0.12
+  },
+  {
+   "type": "car",
+   "share_of_events": 0.11
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}

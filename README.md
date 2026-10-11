@@ -12,11 +12,12 @@ photos ──► Gold SDK ──► reading ──► planner ──► Arcade b
 
 | Folder | What |
 |---|---|
-| `gold_sdk/` | The only boundary to Gold: the reading contract, a stub, and invented fixtures. The protected SDK drops in here |
+| `gold_sdk/` | The only boundary to Gold: the reading contract, **Gold insight packs** (8 archetypes) and invented example people. The demo plugs one pack into each user |
 | `planner/` | Reading → store + pieces. Its rules are enforced in code: colours only from the palette, every "why" quotes a real share |
 | `arcade/` | Arcade client, a mock built from Arcade's published OpenAPI spec, and the design runner. **Live calls are off** unless `ARCADE_LIVE=1` |
-| `storefront-app/` | The app (Expo + Firebase) |
-| `ideas/` | Six group → product ideas, researched and framed end to end |
+| `marketplace/` | **Idea 7**: a creator's brand template + a fan's Gold insights → a custom piece listed on the creator's marketplace |
+| `backend/` | The API the app's UI is built against (Firebase Functions + Firestore) |
+| `ideas/` | Six group → product ideas, researched and framed end to end (idea 7 is `marketplace/`) |
 | `research/` | Background research on taste, brand reading and creator merch |
 
 ```bash

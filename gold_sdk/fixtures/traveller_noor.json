@@ -1,0 +1,42 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-traveller-noor",
+  "_note": "INVENTED traveller for development (whole camera roll, named places opted in). Not anyone's real photos.",
+  "photos": {"count": 1840, "events": 212},
+  "signature": [
+    {"idea": "street markets", "share_of_events": 0.22, "strength": 0.74, "evidence": ["ev-012", "ev-087"], "synonyms": ["market stalls", "street food carts"]},
+    {"idea": "hiking trails", "share_of_events": 0.18, "strength": 0.69, "evidence": ["ev-033", "ev-140"], "synonyms": ["ridge walks"]},
+    {"idea": "handmade textiles", "share_of_events": 0.15, "strength": 0.63, "evidence": ["ev-091"], "synonyms": ["woven cloth", "embroidery"]},
+    {"idea": "old stone streets", "share_of_events": 0.12, "strength": 0.55, "evidence": ["ev-160"], "synonyms": ["cobbled lanes"]}
+  ],
+  "palette": [
+    {"name": "sand", "hex": "#d9c7a7", "share": 0.28, "source": "lives_with"},
+    {"name": "ink", "hex": "#2b2f3a", "share": 0.2, "source": "lives_with"},
+    {"name": "marigold", "hex": "#e3a33b", "share": 0.14, "source": "goes_to"},
+    {"name": "moss", "hex": "#5d6b45", "share": 0.12, "source": "goes_to"},
+    {"name": "brick", "hex": "#a4512f", "share": 0.09, "source": "saves"}
+  ],
+  "places": [
+    {"type": "street or city", "share_of_events": 0.34},
+    {"type": "market", "share_of_events": 0.2},
+    {"type": "mountains or trail", "share_of_events": 0.17},
+    {"type": "home interior", "share_of_events": 0.16}
+  ],
+  "named_places": [
+    {"label": "Oaxaca", "events": 11},
+    {"label": "Edinburgh", "events": 6},
+    {"label": "Halifax", "events": 2}
+  ],
+  "trips": [
+    {"place": "Oaxaca", "start": "2026-03-06", "end": "2026-03-13", "events": 11},
+    {"place": "Edinburgh", "start": "2026-05-22", "end": "2026-05-26", "events": 6},
+    {"place": "Halifax", "start": "2026-08-02", "end": "2026-08-03", "events": 2}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.83, "note": "fixture value; the real SDK reports its own"},
+    "palette": {"status": "measured", "value": 0.9},
+    "places": {"status": "measured", "value": 0.76},
+    "named_places": {"status": "measured", "value": 0.95},
+    "trips": {"status": "unmeasured", "note": "trip boundaries are proposed; the owner confirms each one"}
+  }
+}

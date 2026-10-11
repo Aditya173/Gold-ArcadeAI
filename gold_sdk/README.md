@@ -11,6 +11,18 @@ reading = read(photos)          # photos: list of image paths the person chose (
 reading["signature"][0]         # {"idea": "hand-thrown ceramics", "share_of_events": 0.41, ...}
 ```
 
+## For the demo: Gold insight packs
+
+The demo needs no SDK service. Each user is given an uploaded **Gold insight pack**, a full
+`gold.reading.v0`:
+- `insights/archetype-*.json`: Gold's 8 portrait archetypes (e.g. Night-Shift Builder,
+  Small-Table Host). Each carries the archetype's own words, plus example palette and shares.
+- `fixtures/*.json`: invented example people for each idea.
+
+```python
+read([], fixture="archetype-small-table-host")
+```
+
 ## The reading (`gold.reading.v0`)
 
 The full schema is in `contract.schema.json`, and `fixtures/` has worked examples.

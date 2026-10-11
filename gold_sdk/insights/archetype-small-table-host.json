@@ -1,0 +1,166 @@
+{
+ "schema": "gold.reading.v0",
+ "subject": "archetype-small-table-host",
+ "_note": "Gold insight pack: a portrait ARCHETYPE (a theme seen across many rolls), not a person. Palette and shares are example values for the demo.",
+ "archetype": {
+  "name": "Small-Table Host",
+  "one_line": "Makes the occasion themselves — food cooked, things made by hand, a few people around one table.",
+  "reads": {
+   "rhythms": "Evenings are built around a shared table or a task for the hands, and their idea of rest usually arrives with something to make attached to it.",
+   "life_phases": "They settle a new place by getting the kitchen and the rituals running first, and each phase leaves something physical behind — a print, a keepsake, a dish that carried over."
+  },
+  "title_phrasings": [
+   "Turns the flat into the venue",
+   "Feeds four people before booking anything",
+   "Rests with something to make at the table",
+   "Hands over something made by hand",
+   "Gets the kitchen running before unpacking"
+  ]
+ },
+ "photos": {
+  "count": 300,
+  "events": 80
+ },
+ "signature": [
+  {
+   "idea": "dinner table for four",
+   "share_of_events": 0.4,
+   "strength": 0.9,
+   "synonyms": [
+    "shared table spread",
+    "set table"
+   ],
+   "evidence": [
+    "ev-001",
+    "ev-002"
+   ]
+  },
+  {
+   "idea": "home-cooked dishes",
+   "share_of_events": 0.4,
+   "strength": 0.85,
+   "synonyms": [
+    "pots on stove",
+    "plated meal"
+   ],
+   "evidence": [
+    "ev-004",
+    "ev-005"
+   ]
+  },
+  {
+   "idea": "hands making crafts",
+   "share_of_events": 0.25,
+   "strength": 0.75,
+   "synonyms": [
+    "craft table",
+    "knitting at table"
+   ],
+   "evidence": [
+    "ev-007",
+    "ev-008"
+   ]
+  },
+  {
+   "idea": "candlelit living room",
+   "share_of_events": 0.2,
+   "strength": 0.65,
+   "synonyms": [
+    "warm evening lamps"
+   ],
+   "evidence": [
+    "ev-010",
+    "ev-011"
+   ]
+  },
+  {
+   "idea": "handmade gift wrapped",
+   "share_of_events": 0.15,
+   "strength": 0.65,
+   "synonyms": [
+    "printed card",
+    "handmade keepsake"
+   ],
+   "evidence": [
+    "ev-013",
+    "ev-014"
+   ]
+  },
+  {
+   "idea": "kitchen before unpacking",
+   "share_of_events": 0.12,
+   "strength": 0.55,
+   "synonyms": [
+    "boxes beside stove"
+   ],
+   "evidence": [
+    "ev-016",
+    "ev-017"
+   ]
+  }
+ ],
+ "palette": [
+  {
+   "name": "candle amber",
+   "hex": "#e9a85c",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "linen cream",
+   "hex": "#efe6d4",
+   "share": 0.25,
+   "source": "lives_with"
+  },
+  {
+   "name": "terracotta",
+   "hex": "#c2643f",
+   "share": 0.2,
+   "source": "lives_with"
+  },
+  {
+   "name": "herb green",
+   "hex": "#6f8f4e",
+   "share": 0.15,
+   "source": "lives_with"
+  },
+  {
+   "name": "wine red",
+   "hex": "#7a2836",
+   "share": 0.15,
+   "source": "goes_to"
+  }
+ ],
+ "places": [
+  {
+   "type": "dining table",
+   "share_of_events": 0.45
+  },
+  {
+   "type": "kitchen",
+   "share_of_events": 0.25
+  },
+  {
+   "type": "living room",
+   "share_of_events": 0.2
+  },
+  {
+   "type": "restaurant",
+   "share_of_events": 0.1
+  }
+ ],
+ "reliability": {
+  "signature": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "palette": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  },
+  "places": {
+   "status": "unmeasured",
+   "note": "example insight pack"
+  }
+ }
+}
