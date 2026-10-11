@@ -118,6 +118,10 @@ Build every screen in Part 1 with every element, data source, action and state l
   - **Connect Instagram**: open `authUrl` from `GET /instagram/connect` with `expo-web-browser` (auth session);
     the backend callback redirects back to the app's deep link; then `GET /instagram/media` shows the post grid,
     the creator picks 1–4, and they are sent as `instagramMediaIds[]`. Keep the upload fallback;
+  - **Import from a public handle** (already built in the backend): handle field -> `POST /instagram/scrape` ->
+    grid of `images[]` (base64) -> picked ones sent to onboarding as `kind: "instagram"`. Set `PYTHON` in
+    `backend/functions/.env.local` to the repo venv (it has gallery-dl). Run
+    `INSTAGRAM_SCRAPE_LIVE=1 PYTHON=$PWD/venv/bin/python npm test` once to confirm the live fetch works on the Mac;
   - palette editor with hex validation;
   - Instagram handle regex;
   - style-image pick;

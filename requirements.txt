@@ -1,3 +1,4 @@
 jsonschema>=4
 anthropic>=0.40
 pillow>=10
+gallery-dl>=1.32

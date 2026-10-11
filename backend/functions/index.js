@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 const flow = require('./src/flow');
 const packs = require('./src/packs');
 const market = require('./src/marketplace');
+const ig = require('./src/instagram');
 const { ArcadeError } = require('./src/arcade');
 
 admin.initializeApp();
@@ -28,6 +29,7 @@ const ROUTES = [
   ['GET', /^\/public\/([^/]+)$/, false, (uid, [storeId]) => flow.getPublic(db(), { storeId })],
   ['POST', /^\/public\/([^/]+)\/products\/([^/]+)\/checkout$/, true, (uid, [storeId, pid]) => flow.checkout(db(), uid, { storeId, pid })],
   // the brand-template marketplace (idea 7)
+  ['POST', /^\/instagram\/scrape$/, true, (uid, _, b) => ig.scrape(uid, b)],
   ['POST', /^\/creators$/, true, (uid, _, b) => market.createCreator(db(), uid, b)],
   ['GET', /^\/creators\/([^/]+)$/, false, (uid, [creatorId]) => market.getCreator(db(), { creatorId })],
   ['POST', /^\/creators\/([^/]+)\/items$/, true, (uid, [creatorId], b) => market.makeItem(db(), uid, { ...b, creatorId })],

@@ -142,7 +142,8 @@ success (summary card shown).
 | **Connect Instagram** action (business or creator account, via Meta's Instagram Login) | `GET /instagram/connect` -> open `authUrl`; Meta redirects to `GET /instagram/callback`; afterwards `GET /instagram/status` -> `{connected, username}` |
 | After connecting: grid of the account's recent image posts (carousel images flattened), pick 1–4 | `GET /instagram/media` -> `media[]`: `id`, `mediaUrl` (show as thumbnail), `permalink`, `timestamp`, `mediaType` (`IMAGE` only; videos are skipped) -> chosen IDs sent as `instagramMediaIds[]` |
 | Instagram handle (filled from the connected account; editable only when not connected) | `instagram` (text, shown on the creator page) |
-| Fallback when not connecting: "add images from your Instagram" upload (pick 1–4 saved posts) | images -> `images[]` with `kind: "instagram"` |
+| **Import from a public handle** (no Instagram login): handle field + "Import" action -> grid of the latest posts, pick 1–4 | `POST /instagram/scrape {handle}` -> `images[]`: `mediaId`, `takenAt`, `caption`, `mediaType`, `dataBase64` (show as thumbnails). Picked ones -> `images[]` with `kind: "instagram"` (their `mediaType` + `dataBase64`). States: importing (10–20 s), imported (grid), failed (503: private account, only videos, or Instagram blocked it -> show `error.message`, offer the other two options) |
+| Fallback: "add images from your Instagram" upload (pick 1–4 saved posts) | images -> `images[]` with `kind: "instagram"` |
 | **Colour palette**: 2–6 colours, each a hex value, with add/remove | `palette[]` of `#rrggbb` (backend lowercases) |
 | Optional "style words" (up to 3, e.g. "hand-drawn, coastal") | `styleWords[]` -> added to every prompt |
 | List of every chosen image (local thumbnail) with its kind and a remove action | local |
@@ -449,6 +450,7 @@ Base: `http://127.0.0.1:5001/demo-storefront/us-central1/api`. Errors stay `{"er
 | `POST /users/{uid}/insights` | own uid | `{pack, role}` | existing reading object; also writes `users/{uid}.role` | none |
 | `GET /users/{uid}/insights` | own uid | – | existing + `role`, `creatorId` (S0 restores the session from this after a reload) | none |
 | `POST /creators/onboard` **new** | yes | `{name, handle, instagram, palette:["#rrggbb"..], styleWords?:[], images:[{kind:"logo"\|"reference"\|"instagram", mediaType, dataBase64}], instagramMediaIds?:[id..≤4], styleRefs?:[i,i,i]}` (each Instagram media ID is fetched server-side from the connected account and added as `kind:"instagram"`) or `{fixture:"brand_wishbonekitchen"}`. `creatorId = 'creator-' + slug(handle)`; hex lowercased before validating; same `creatorId` owned by a different uid -> **403** (existing `createCreator` check) | `{creatorId, style:{images[]{kind,status,referenceId}, styleRefs[], palette[], styleWords[]}}` | per image: `references/createUpload` -> PUT `uploadUrl` -> `references/create` |
+| `POST /instagram/scrape` **built** | yes | `{handle, max?=6}` | `{handle, source, images:[{mediaId, shortcode, takenAt, caption, mediaType, byteLength, width, height, dataBase64}]}`; 400 bad handle, 503 blocked/private/timeout. Logged out via gallery-dl (`instagram/scrape.py`); newest first, one image per post, videos and pinned posts skipped, each ≤1600 px and ≤1 MB | none (Instagram public web, logged out) |
 | `GET /instagram/connect` **new** | yes | – | `{authUrl}`: Instagram Login URL with `scope=instagram_business_basic`, our `redirect_uri`, and `state` = a signed uid | none |
 | `GET /instagram/callback` **new** | via `state` | `?code=&state=` (from Meta) | exchanges `code` for a token, then a long-lived token; stores it at `users/{uid}/private/instagram` (server-only); redirects back to the app | Meta: token exchange |
 | `GET /instagram/status` **new** | yes | – | `{connected, username}` | Meta: `GET /me?fields=user_id,username` |
@@ -538,6 +540,30 @@ the mock answers 501), per-image intent (Studio-only). **Instagram is read only 
 account** (Instagram API with Instagram Login, `instagram_business_basic`). We do not read other people's accounts:
 Meta's Business Discovery reads other public business accounts but doesn't document `media_url`, and their images
 aren't ours to turn into products.
+
+### 2.7b Instagram import, where it plugs in (built and tested 2026-10-11)
+
+Three ways to get Instagram images into S3, in order of preference for the demo:
+
+| Path | How | Status |
+|---|---|---|
+| **Import from a public handle** | `POST /instagram/scrape {handle}` -> `backend/functions/src/instagram.js` runs `instagram/scrape.py` (gallery-dl, logged out) -> base64 images -> UI grid -> picked ones go into onboarding as `kind:"instagram"` | **Built.** Unit tests (fake mode) and one live fetch pass; live: 5 images from the latest 12 posts of a public creator account in ~14 s |
+| Connect Instagram (Meta API) | the creator's own business/creator account, routes above | Brief only (U4b) |
+| Upload saved posts | file picker | Always works; keep it |
+
+- **Locally (the demo):** the app's S3 screen calls `POST /instagram/scrape` on the **Functions emulator** on the dev
+  machine, which starts Python itself. Set `PYTHON` in `backend/functions/.env.local` to a Python with `gallery-dl`
+  and `pillow` (`pip install -r requirements.txt`). Code: route in `backend/functions/index.js`, runner
+  `backend/functions/src/instagram.js`, scraper `instagram/scrape.py`, tests `backend/functions/test/instagram.test.js`
+  (`INSTAGRAM_SCRAPE_LIVE=1` adds a real fetch).
+- **Deployed:** Cloud Functions (Node) has no Python. Put `instagram/scrape.py` behind a tiny Python service (Cloud
+  Run, one endpoint) and have `instagram.js` call it by URL instead of starting a process. Not needed for the demo.
+- **Measured behaviour:** gallery-dl worked logged out in every run today (6, 40 and 7 images; no 429).
+  Instaloader got HTTP 429 on its first request both times, so it isn't used. Instagram can start blocking logged-out
+  access at any time: before recording, run the import once and keep the fake mode (`INSTAGRAM_SCRAPE_FAKE=1`) as the
+  fallback.
+- Until `POST /creators/onboard` (U4) exists, the scraped images can be checked by eye from the response; U4 takes
+  them as `images[]` with `kind: "instagram"` unchanged.
 
 ## 2.8 Product creation sequences
 
@@ -658,6 +684,7 @@ is offline and deterministic.
 | Meta app not reviewed | Development mode works for accounts added as **testers** on the Meta app. Only those accounts can connect today. |
 | The demo creator's real account | Only connects if they log in themselves. Otherwise connect a team-owned business/creator test account. Never download a creator's posts without their consent. |
 | `media_url` expires | Download at onboard time only; never store it. |
+| Public-handle import blocked (logged-out Instagram changes) | Retry once; then the upload fallback; record the demo with fake mode if needed. |
 
 ## 2.15 Build plan for today (ultracode work units)
 

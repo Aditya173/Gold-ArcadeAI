@@ -15,9 +15,9 @@ const PY = process.env.PYTHON || 'python';
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const maya = () => packs.load('creator_maya').reading;
 
-test('packs: the 8 archetype insight packs and the invented fixtures load, valid and marked stub', () => {
+test('packs: the 9 archetype insight packs (8 Gold + the synthetic Long-Table Host) and the invented fixtures load, valid and marked stub', () => {
   const l = packs.list();
-  assert.strictEqual(l.filter((p) => p.kind === 'archetype').length, 8);
+  assert.strictEqual(l.filter((p) => p.kind === 'archetype').length, 9);
   assert.ok(l.some((p) => p.id === 'creator_maya' && p.kind === 'fixture'));
   for (const p of l) assert.strictEqual(packs.load(p.id).reading.stub, true, p.id);
   assert.strictEqual(packs.load('../../package'), null, 'no path tricks');

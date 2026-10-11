@@ -190,6 +190,29 @@ POST /creators ─► (fans) POST /users/{uid}/insights ─► POST /creators/{i
                                                                                   ─► GET /marketplace/{itemId} ─► POST …/buy
 ```
 
+### `POST /instagram/scrape` (auth)
+
+Pulls a **public** Instagram account's latest post images for creator onboarding (the brand page). Logged out, no
+Instagram account needed. Runs `instagram/scrape.py` (gallery-dl) on the server.
+
+Request: `{"handle": "wishbonekitchen", "max": 6}` (`@` optional; `max` 1–6, default 6).
+
+Response:
+```json
+{"handle": "wishbonekitchen", "source": "gallery-dl",
+ "images": [{"mediaId": "4003433320117355812", "shortcode": "DePDWS_jsUk", "takenAt": "2026-10-08 13:34:23",
+             "caption": "...", "mediaType": "image/jpeg", "byteLength": 234512, "width": 1200, "height": 1600,
+             "dataBase64": "..."}]}
+```
+
+- Newest first; one image per post (the first of a carousel); videos and **pinned posts are skipped**; each image
+  shrunk to at most 1600 px and 1 MB.
+- The UI shows `images[]` as a grid, the creator picks 1–4, and the picked ones go to onboarding as brand images
+  with `kind: "instagram"` (their `mediaType` + `dataBase64`). Nothing is stored by this route.
+- Errors: **400** bad handle; **503** private account, only videos, Instagram blocked the request, or timeout
+  (show `error.message` and offer the upload fallback). Takes about 10–20 s.
+- `INSTAGRAM_SCRAPE_FAKE=1` in `functions/.env.local` returns generated images (offline demo and tests).
+
 ### `POST /creators` (auth; the caller becomes the owner)
 
 Body: a full `brand.kit.v0`, or `{"fixture": "brand_tide_and_clay"}` for the demo kit. The kit is
