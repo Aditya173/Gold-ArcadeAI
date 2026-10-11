@@ -122,7 +122,7 @@ function templateFill(k, t, r) {
 // recorded (offline, hand-written) -> one Claude call when ANTHROPIC_API_KEY is set -> template fill
 async function planItem(k, t, r, { key = process.env.ANTHROPIC_API_KEY, fetchImpl = fetch } = {}) {
   const rec = (fixture('recorded_items') || {})[`${t.templateId}|${r.subject}`];
-  if (rec) return { item: rec, model: 'recorded' };
+  if (rec && !checkItem(rec, k, t, r).length) return { item: rec, model: 'recorded' };   // key has no creatorId: formKit reuses wk-* ids
   if (key) return { item: await planner.askClaude(SYSTEM, userMsg(k, t, r), { key, fetchImpl }), model: 'claude-opus-5-5' };
   return { item: templateFill(k, t, r), model: 'template' };
 }

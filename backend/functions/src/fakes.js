@@ -52,7 +52,7 @@ async function loadFakes(db, list = readFakes()) {
         const k = M.fixture(`brand_${p.creatorId.replace(/^creator-/, '').replace(/-/g, '_')}`);
         if (!k) fail('invalid-argument', `${p.creatorId}: no such creator in the emulator and no brand_*.json fixture for it`);
         await ref.set({ ...M.publicKit(k), createdAt: Date.now(), updatedAt: Date.now(), fake: true });
-        await ref.collection('private').doc('assets').set({ owner: 'seed', assets: k.assets || [], referenceIds: {}, templates: k.templates });
+        await ref.collection('private').doc('assets').set({ owner: `seed-${p.creatorId}`, assets: k.assets || [], referenceIds: {}, templates: k.templates });
       }
       creators[p.creatorId] = (await ref.get()).data().name;
     }

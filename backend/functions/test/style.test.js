@@ -66,7 +66,8 @@ test('onboard (form): 3 images -> 3 referenceIds, default styleRefs include the 
   const k = { ...pub, assets: priv.assets, templates: priv.templates };
   assert.deepStrictEqual(M.validateKit({ ...k, schema: 'brand.kit.v0' }), []);
   const r = packs.load('archetype-long-table-host').reading;
-  const passing = k.templates.map((tp) => M.templateFill(k, tp, r)).filter((it, i) => it && !M.checkItem(it, k, k.templates[i], r).length);
+  const planned = (await Promise.all(k.templates.map((tp) => M.planItem(k, tp, r, { key: '' })))).map((p) => p.item);   // not WK's recorded items
+  const passing = planned.filter((it, i) => it && !M.checkItem(it, k, k.templates[i], r).length);
   assert.ok(passing.length >= 3, `${passing.length} items pass checkItem`);
   assert.ok(priv.templates.find((x) => x.world === 'jewelry').brief.includes('shaped like {brand_element}'));
 });
@@ -109,4 +110,11 @@ test('onboard (fixture): Wishbone Kitchen uploads its 3 fixture PNGs; insights c
   await flow.attachInsights(db, 'uf', { pack: 'archetype-long-table-host', role: 'fan' });
   assert.deepStrictEqual([(await flow.getInsights(db, 'uf')).role, (await flow.getInsights(db, 'uf')).creatorId], ['fan', null]);
   await assert.rejects(flow.attachInsights(db, 'uf', { pack: 'archetype-long-table-host', role: 'admin' }), (e) => e.code === 'invalid-argument');
+});
+
+test('fake products loaded first do not lock the seed / demo creator out of onboarding', async () => {
+  const db = memDb();
+  await require('../src/fakes').loadFakes(db);
+  const out = await style.onboard(db, 'seed-creator-wishbonekitchen', { fixture: 'brand_wishbonekitchen' }, { arc: { reference: async () => 'ref-x' } });
+  assert.strictEqual(out.creatorId, 'creator-wishbonekitchen');
 });
