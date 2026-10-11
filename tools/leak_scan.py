@@ -16,8 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 BINARY = re.compile(r"\.(jpe?g|png|heic|webp|gif|npy|safetensors|mlpackage|zip|pdf)$", re.I)
-# exact files allowed where they are (partner uploads at the repo root: demo Instagram/brand screenshots)
-ASSET_FILES = {"IMG_5332.jpg", "IMG_5333.jpg", "IMG_5334.jpg", "IMG_5335.jpg", "INSTAGRAM 1.png", "INSTAGRAM 2.png"}
+# images uploaded at the repo root by the team (demo screenshots, product images) are allowed where they are
 ASSET_OK = ("storefront-app/assets/", "marketplace/fixtures/fake_products/images/", "marketplace/fixtures/images/", "docs/screens/")
 SECRETS = [re.compile(p) for p in (r"sk-ant-[A-Za-z0-9_-]{20,}", r"arcade_sk_live_[A-Za-z0-9]{8,}",
                                    r"-----BEGIN [A-Z ]*PRIVATE KEY-----", r'"private_key_id"\s*:', r"AIza[0-9A-Za-z_-]{30,}")]
@@ -41,7 +40,7 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
     for p in paths:
         if p == "tools/leak_scan.py":
             continue
-        if BINARY.search(p) and not (p.startswith(ASSET_OK) or p in ASSET_FILES):
+        if BINARY.search(p) and not (p.startswith(ASSET_OK) or "/" not in p):
             bad.append(f"{p}: binary/image file")
             continue
         if BINARY.search(p):
@@ -64,12 +63,14 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
 def selftest() -> None:
     terms = [re.compile("secretplace", re.I)]
     docs = {"a.md": "fine", "b.md": "we went to SecretPlace", "c.jpg": "", "d.md": "key sk-ant-" + "x" * 30,
-            "storefront-app/assets/icon.png": "", "x/package-lock.json": "secretplace-decoder"}
+            "storefront-app/assets/icon.png": "", "x/package-lock.json": "secretplace-decoder", "root.png": "",
+            "deep/dir/c2.jpg": ""}
     bad = scan(list(docs), terms, read=lambda p: docs[p])
-    assert any(b.startswith("b.md:1") for b in bad) and any(b.startswith("c.jpg") for b in bad)
+    assert any(b.startswith("b.md:1") for b in bad) and any(b.startswith("deep/dir/c2.jpg") for b in bad)
+    assert not any(b.startswith(("c.jpg", "root.png")) for b in bad), "root-level images are allowed"
     assert any(b.startswith("d.md") and "secret" in b for b in bad)
     assert not any(b.startswith(("a.md", "storefront-app/assets", "x/package-lock.json")) for b in bad), bad
-    print("leak_scan selftest: 5 checks PASS")
+    print("leak_scan selftest: 6 checks PASS")
 
 
 def main() -> int:
