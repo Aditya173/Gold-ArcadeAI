@@ -27,6 +27,7 @@ const png = (name) => readFileSync(new URL(`../../marketplace/fixtures/images/${
 
 const { packs } = await api('GET', '/packs');
 assert.strictEqual(packs.filter((p) => p.kind === 'archetype').length, 9);
+log(`packs: ${packs.length} (${packs.filter((p) => p.kind === 'archetype').length} archetypes)`);
 
 // creator
 const c = await user();

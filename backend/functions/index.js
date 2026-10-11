@@ -6,6 +6,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const flow = require('./src/flow');
 const packs = require('./src/packs');
+const fakes = require('./src/fakes');
 const { ArcadeError } = require('./src/arcade');
 
 if (!admin.apps.length) admin.initializeApp();
@@ -50,6 +51,9 @@ const ROUTES = [
   ['GET', /^\/marketplace$/, false, use('marketplace', 'feed', (f, uid, _, b, q) => f(db(), uid, q))],
   ['GET', /^\/marketplace\/([^/]+)$/, false, use('marketplace', 'getItem', (f, uid, [itemId]) => f(db(), uid, { itemId }))],
   ['POST', /^\/marketplace\/([^/]+)\/buy$/, true, use('marketplace', 'buy', (f, uid, [itemId], b) => f(db(), uid, { ...b, itemId }))],
+  // local simulation only: load marketplace/fixtures/fake_products/products.json into the emulator
+  ['POST', /^\/dev\/fake-products$/, false, () => (process.env.FUNCTIONS_EMULATOR === 'true' ? fakes.loadFakes(db())
+    : (() => { throw new flow.HttpsishError('permission-denied', 'emulator only'); })())],
 ];
 const deny = () => { throw new flow.HttpsishError('permission-denied', 'you can only act on your own user'); };
 
@@ -62,6 +66,11 @@ async function uidOf(req) {
 // plain (req, res) router; exported as `api` below and as api.handle for tests
 async function handle(req, res) {
   const send = (code, status, message) => res.status(status).json({ error: { code, message } });
+  const asset = /^\/assets\/fake\/([^/]+)$/.exec(req.path);              // images for fake products (relative imageUrl)
+  if (asset && req.method === 'GET') {
+    const f = fakes.assetPath(decodeURIComponent(asset[1]));
+    return f ? res.sendFile(f) : send('not-found', 404, 'no such image');
+  }
   const route = ROUTES.map(([method, re, auth, fn]) => ({ method, m: re.exec(req.path), auth, fn })).filter((r) => r.m);
   const hit = route.find((r) => r.method === req.method);
   if (!hit) return route.length ? send('method-not-allowed', 405, `${req.method} ${req.path}`) : send('not-found', 404, `no route ${req.path}`);

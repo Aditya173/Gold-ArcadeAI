@@ -141,6 +141,13 @@ Response:
   (show `error.message` and offer the upload fallback). Takes about 10–20 s.
 - `INSTAGRAM_SCRAPE_FAKE=1` in `functions/.env.local` returns generated images (offline demo and tests).
 
+### `POST /dev/fake-products` (no auth; emulator only)
+
+Loads `marketplace/fixtures/fake_products/products.json` into the emulator (format: that folder's README). Returns
+`{"loaded": 3, "creators": ["creator-wishbonekitchen"]}`. Fake items have `fake: true`, `price.mock: true`, and a
+relative `imageUrl` (`/assets/fake/<file>`, served by `GET /assets/fake/{file}`; prefix the API base). Buying one
+returns a demo checkout (`fake: true`, `checkoutUrl: null`) without calling Arcade.
+
 
 ### `GET /creators?q=` (no auth)
 

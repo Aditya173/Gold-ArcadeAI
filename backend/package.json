@@ -8,7 +8,8 @@
     "e2e": "firebase emulators:exec --only auth,firestore,functions --project demo-storefront \"node test/e2e.mjs\"",
     "emulators": "firebase emulators:start --only auth,firestore,storage,functions --project demo-storefront",
     "seed": "node scripts/seed.mjs",
-    "seed:fans": "node scripts/seed.mjs --fans-only"
+    "seed:fans": "node scripts/seed.mjs --fans-only",
+    "fakes": "firebase emulators:exec --only auth,firestore,functions --project demo-storefront \"node test/fakes_smoke.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

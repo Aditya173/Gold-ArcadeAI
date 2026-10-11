@@ -8,8 +8,10 @@ every piece.
 
 | Doc | For |
 |---|---|
+| [`SIMULATE.md`](SIMULATE.md) | **A tester starts here.** Run the whole thing offline: the selftests, a marketplace built end to end, the backend in the emulators, and what never to do |
 | [`BRIEF_MARKETPLACE.md`](BRIEF_MARKETPLACE.md) | **Today's build.** Part 1: every screen and the demo video (for the UI teammate). Part 2: the backend, endpoints, Arcade style and product creation, Instagram via Meta, and the build plan |
 | [`MAC_BUILD_PROMPT.md`](MAC_BUILD_PROMPT.md) | One paste-in prompt that builds, compiles and runs the whole app on a Mac |
+| [`WIRING.md`](WIRING.md) | **Where everything plugs in** for the local simulation: run commands, the synthetic archetype, fake products |
 | [`backend/API.md`](backend/API.md) | The API the app calls |
 | [`HACKATHON_DAY.md`](HACKATHON_DAY.md) | Switching from the mock to live Arcade |
 

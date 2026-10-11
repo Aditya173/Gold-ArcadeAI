@@ -1,0 +1,41 @@
+{
+  "_note": "Fake products for the LOCAL simulation (no Arcade). Loaded into the emulator by POST /dev/fake-products. Format: README.md beside this file. Replace or extend these three examples.",
+  "products": [
+    {
+      "creatorId": "creator-wishbonekitchen",
+      "maker": "creator",
+      "title": "Gingham Supper Runner",
+      "category": "textile",
+      "description": "A long table runner in tomato gingham on cream, made for a full table.",
+      "price": {"amount": "68.00", "currency": "USD"},
+      "image": "wk-runner-gingham.jpg",
+      "colors": ["#c8472d", "#f3ead7"],
+      "public_tag": "for long dinners",
+      "buys": 12
+    },
+    {
+      "creatorId": "creator-wishbonekitchen",
+      "maker": "creator",
+      "title": "Scalloped Dinner Plate",
+      "category": "ceramic plate",
+      "description": "A cream dinner plate with a scalloped tomato rim and a butter-yellow centre.",
+      "price": {"amount": "42.00", "currency": "USD"},
+      "image": "wk-plate-scalloped.jpg",
+      "colors": ["#f3ead7", "#c8472d", "#edd27a"],
+      "buys": 7
+    },
+    {
+      "creatorId": "creator-wishbonekitchen",
+      "maker": "fan",
+      "title": "Candlelit Wishbone",
+      "category": "pendant necklace",
+      "description": "A 14k yellow gold wishbone pendant with a small taper candle engraved on the back.",
+      "price": {"amount": "184.00", "currency": "USD"},
+      "image": "fan-wishbone-pendant.jpg",
+      "public_tag": "for candlelit dinners",
+      "fan_idea": "candlelit tablescapes",
+      "why": "Candlelit tablescapes show up in 27% of your moments, so the back carries a single taper candle.",
+      "buys": 3
+    }
+  ]
+}
