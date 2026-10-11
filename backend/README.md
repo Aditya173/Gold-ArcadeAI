@@ -24,7 +24,7 @@ creator brand kit + fan's pack → item (brand rules checked) → creator's mark
 
 ## Run it
 
-Needs Node 20+, Java 11+ (Firestore emulator), the Firebase CLI (`npm i -g firebase-tools`) and Python with
+Needs Node 20+, Java 21+ (firebase-tools refuses older), the Firebase CLI (`npm i -g firebase-tools`) and Python with
 `pip install -r ../requirements.txt` (the mock Arcade).
 
 ```bash

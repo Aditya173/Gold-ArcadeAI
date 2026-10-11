@@ -38,7 +38,7 @@ Check and install what's missing (Homebrew where needed). Report versions.
 - Xcode (latest installed) + command line tools; an iOS Simulator runtime; `xcrun simctl list devices` shows an
   iPhone.
 - Node 20 LTS or newer, npm; `watchman`.
-- Java 17+ (needed by the Firebase emulators); `firebase-tools` (`npm i -g firebase-tools`).
+- Java 21+ (firebase-tools refuses older for the emulators); `firebase-tools` (`npm i -g firebase-tools`).
 - Python 3.11+ with a venv at `venv` and `pip install -r requirements.txt` (needs `jsonschema`, `pillow`).
 - CocoaPods (Expo prebuild uses it).
 

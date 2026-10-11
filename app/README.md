@@ -4,8 +4,7 @@ Expo + expo-router + TypeScript. Talks to the local Firebase emulators (project 
 
 ```
 npm install
-npx expo start --ios          # Simulator reaches the Mac at 127.0.0.1
-EXPO_PUBLIC_API_BASE=http://<mac-lan-ip>:5001/demo-storefront/us-central1/api npx expo start   # real phone
+npx expo start --ios          # Simulator reaches the Mac at 127.0.0.1 (a real phone can't: the emulators listen on 127.0.0.1 only)
 npx tsc --noEmit
 ```
 
