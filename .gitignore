@@ -1,0 +1,10 @@
+out/
+.env
+.env.*
+__pycache__/
+node_modules/
+.expo/
+dist/
+web-build/
+*-debug.log
+functions/.env.local

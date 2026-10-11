@@ -1,0 +1,44 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-couple-june-ola",
+  "_note": "INVENTED couple for development (two rolls merged, both opted in). Not anyone's real photos.",
+  "photos": {"count": 688, "events": 141},
+  "signature": [
+    {"idea": "long dinners with friends", "share_of_events": 0.34, "strength": 0.79, "evidence": ["ev-104", "ev-117"], "synonyms": ["candlelit table"]},
+    {"idea": "mountain hikes", "share_of_events": 0.26, "strength": 0.74, "evidence": ["ev-131", "ev-140"], "synonyms": ["alpine lakes", "trailheads"]},
+    {"idea": "vintage shops", "share_of_events": 0.17, "strength": 0.6, "evidence": ["ev-150"], "synonyms": ["thrift finds"]},
+    {"idea": "sunset rooftops", "share_of_events": 0.15, "strength": 0.57, "evidence": ["ev-162"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "forest", "hex": "#3d5a45", "share": 0.27, "source": "goes_to"},
+    {"name": "candle", "hex": "#e9b872", "share": 0.21, "source": "lives_with"},
+    {"name": "plum", "hex": "#6b3a55", "share": 0.12, "source": "lives_with"},
+    {"name": "stone", "hex": "#a8a29a", "share": 0.2, "source": "goes_to"}
+  ],
+  "places": [
+    {"type": "restaurant", "share_of_events": 0.31},
+    {"type": "mountains or trail", "share_of_events": 0.25},
+    {"type": "street or city", "share_of_events": 0.22}
+  ],
+  "named_places": [
+    {"label": "Lisbon", "events": 9},
+    {"label": "Dolomites", "events": 7},
+    {"label": "the city where they met", "events": 31}
+  ],
+  "trips": [
+    {"place": "Lisbon", "start": "2025-05-02", "end": "2025-05-09", "events": 9},
+    {"place": "Dolomites", "start": "2025-08-14", "end": "2025-08-20", "events": 7}
+  ],
+  "people": [
+    {"ref": "person-1", "events": 141},
+    {"ref": "person-2", "events": 116},
+    {"ref": "person-3", "events": 22}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.85, "note": "fixture value"},
+    "palette": {"status": "measured", "value": 0.9},
+    "places": {"status": "measured", "value": 0.78},
+    "named_places": {"status": "measured", "value": 0.95},
+    "people": {"status": "measured", "value": 0.97, "note": "precision on the owner; recall lower"}
+  }
+}

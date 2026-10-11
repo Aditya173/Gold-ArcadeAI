@@ -1,0 +1,14 @@
+{
+  "_note": "Stand-in for categories/list until the hackathon. 'docs' = named in docs.arcade.ai examples (the id tails after the documented prefix are placeholders); 'inferred' = print categories named in public Arcade sources, ids invented. Replace the whole file with a live categories/list (briefs/2026-10-11/HACKATHON_DAY.md step 2).",
+  "items": [
+    {"categoryId": "8e1f5c3a-0000-4000-8000-000000000001", "name": "Rings", "world": "jewelry", "imageUrl": null,
+     "category": {"categoryId": "8e1f5c3a-0000-4000-8000-000000000001", "name": "Rings"}, "source": "docs"},
+    {"categoryId": "b52d9e07-0000-4000-8000-000000000002", "name": "Pendant Necklace", "world": "jewelry", "imageUrl": null, "source": "docs"},
+    {"categoryId": "inferred-earrings", "name": "Earrings", "world": "jewelry", "imageUrl": null, "source": "inferred"},
+    {"categoryId": "inferred-rug", "name": "Rug", "world": "print", "imageUrl": null, "source": "inferred"},
+    {"categoryId": "inferred-throw-pillow", "name": "Throw Pillow", "world": "print", "imageUrl": null, "source": "inferred"},
+    {"categoryId": "inferred-wall-art-print", "name": "Wall Art Print", "world": "print", "imageUrl": null, "source": "inferred"},
+    {"categoryId": "inferred-textile", "name": "Textile", "world": "print", "imageUrl": null, "source": "inferred"},
+    {"categoryId": "inferred-ceramic", "name": "Ceramic Plate", "world": "print", "imageUrl": null, "source": "inferred"}
+  ]
+}

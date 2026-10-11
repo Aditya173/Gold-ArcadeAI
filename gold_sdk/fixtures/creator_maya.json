@@ -1,0 +1,34 @@
+{
+  "schema": "gold.reading.v0",
+  "subject": "fixture-creator-maya",
+  "_note": "INVENTED person for development. Not a reading of anyone's photos.",
+  "photos": {"count": 412, "events": 97},
+  "signature": [
+    {"idea": "hand-thrown ceramics", "share_of_events": 0.41, "strength": 0.88, "evidence": ["ev-001", "ev-014", "ev-022"], "synonyms": ["pottery studio", "glazed stoneware"]},
+    {"idea": "morning coffee ritual", "share_of_events": 0.37, "strength": 0.81, "evidence": ["ev-003", "ev-031"], "synonyms": ["pour-over", "coffee bar"]},
+    {"idea": "coastal walks", "share_of_events": 0.29, "strength": 0.72, "evidence": ["ev-040", "ev-052"], "synonyms": ["tide pools", "sea cliffs"]},
+    {"idea": "dried flowers", "share_of_events": 0.18, "strength": 0.61, "evidence": ["ev-061"], "synonyms": ["pressed botanicals"]},
+    {"idea": "slow weekend markets", "share_of_events": 0.16, "strength": 0.55, "evidence": ["ev-070", "ev-077"], "synonyms": ["farmers market"]},
+    {"idea": "linen and natural textures", "share_of_events": 0.14, "strength": 0.52, "evidence": ["ev-083"], "synonyms": []}
+  ],
+  "palette": [
+    {"name": "oat", "hex": "#e8dcc6", "share": 0.31, "source": "lives_with"},
+    {"name": "clay", "hex": "#b8714a", "share": 0.22, "source": "lives_with"},
+    {"name": "sea glass", "hex": "#9fb8ad", "share": 0.17, "source": "goes_to"},
+    {"name": "charcoal", "hex": "#2f2c2a", "share": 0.15, "source": "lives_with"},
+    {"name": "dusty rose", "hex": "#c99a96", "share": 0.08, "source": "saves"}
+  ],
+  "places": [
+    {"type": "studio or workshop", "share_of_events": 0.38},
+    {"type": "cafe", "share_of_events": 0.33},
+    {"type": "beach or coast", "share_of_events": 0.27},
+    {"type": "market", "share_of_events": 0.15}
+  ],
+  "reliability": {
+    "signature": {"status": "measured", "value": 0.88, "note": "fixture value; the real SDK reports its own"},
+    "palette": {"status": "measured", "value": 0.9},
+    "places": {"status": "measured", "value": 0.78},
+    "named_places": {"status": "unmeasured"},
+    "people": {"status": "unmeasured"}
+  }
+}

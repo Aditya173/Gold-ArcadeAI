@@ -1,0 +1,3969 @@
+{
+  "info": {
+    "title": "Arcade API",
+    "version": "1",
+    "description": "Generate patterns and order them as manufactured products. Every request is a POST with a JSON body."
+  },
+  "servers": [
+    { "url": "https://platform.arcade.ai/v1", "description": "Production" }
+  ],
+  "tags": [
+    { "name": "Patterns", "description": "Patterns you generate." },
+    {
+      "name": "Refine",
+      "description": "Edit, recolor, crop and extend patterns."
+    },
+    { "name": "Jobs", "description": "Long-running work." },
+    { "name": "References", "description": "Images that guide generation." },
+    { "name": "Models", "description": "The models that generate patterns." },
+    { "name": "Categories", "description": "Product types and their options." },
+    { "name": "Products", "description": "Products made from your patterns." },
+    { "name": "Checkouts", "description": "Checkouts for ordering products." },
+    { "name": "Orders", "description": "Your orders." },
+    { "name": "Feedback", "description": "Reports about the API to Arcade." }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "An API key from Settings → API keys in Arcade Studio."
+      }
+    }
+  },
+  "security": [{ "apiKey": [] }],
+  "openapi": "3.1.1",
+  "paths": {
+    "/patterns/create": {
+      "post": {
+        "operationId": "patterns.create",
+        "summary": "Create a pattern",
+        "description": "Starts a job that generates a pattern from a prompt. On success, `result.patternId` is the new pattern. Jewelry prompts are checked against the selected category before a job is created; incompatible requests return HTTP 400.\n\nPass a `categoryId` to also make a product from the pattern. The job then runs until the product is built, and `result.productId` is the product. In a `print` category, Arcade picks the product's options. In a `jewelry` category, the pattern is a jewelry design made for that category, with options picked from the prompt; send no `modelId`, `referenceIds` or `colors`. A jewelry design is only for its own product: refines and products.create refuse it.",
+        "tags": ["Patterns"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "referenceIds": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque ID of one uploaded reference image"
+                    },
+                    "default": [],
+                    "description": "References to guide the generation"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "A modelId from models.list; omit to let Arcade choose"
+                  },
+                  "colors": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": { "type": "string", "minLength": 1 },
+                    "default": [],
+                    "description": "#RRGGBB hex, or Arcade palette or Pantone color tokens"
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "A category from categories.list to also make a product in; omit for a pattern alone"
+                  }
+                },
+                "required": ["requestId", "prompt"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                },
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "The product made from the pattern, for a patterns.create job with a categoryId"
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ],
+                  "description": "A pattern job that makes one pattern"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/get": {
+      "post": {
+        "operationId": "patterns.get",
+        "summary": "Retrieve a pattern",
+        "description": "Retrieves a pattern. Image URLs are short-lived; retrieve the pattern again to renew them.",
+        "tags": ["Patterns"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                  }
+                },
+                "required": ["patternId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Short-lived; read again to renew. Host not guaranteed."
+                    },
+                    "thumbnailUrl": { "type": "string", "format": "uri" },
+                    "width": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "height": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "patternId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                    },
+                    "prompt": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "The prompt of the generation this pattern comes from, through any refines; null when none made it"
+                    },
+                    "sourcePatternId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "The pattern a refine was made from; null for a generation"
+                    },
+                    "createdAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "imageUrl",
+                    "thumbnailUrl",
+                    "width",
+                    "height",
+                    "patternId",
+                    "prompt",
+                    "sourcePatternId",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/list": {
+      "post": {
+        "operationId": "patterns.list",
+        "summary": "List patterns",
+        "description": "Lists your patterns, newest first.",
+        "tags": ["Patterns"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ],
+                    "description": "nextCursor of the previous page; omit for the first page"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 60,
+                    "default": 24
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "imageUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Short-lived; read again to renew. Host not guaranteed."
+                          },
+                          "thumbnailUrl": { "type": "string", "format": "uri" },
+                          "width": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "exclusiveMinimum": 0
+                          },
+                          "height": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "exclusiveMinimum": 0
+                          },
+                          "patternId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                          },
+                          "prompt": {
+                            "anyOf": [{ "type": "string" }, { "type": "null" }],
+                            "description": "The prompt of the generation this pattern comes from, through any refines; null when none made it"
+                          },
+                          "sourcePatternId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                              },
+                              { "type": "null" }
+                            ],
+                            "description": "The pattern a refine was made from; null for a generation"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "imageUrl",
+                          "thumbnailUrl",
+                          "width",
+                          "height",
+                          "patternId",
+                          "prompt",
+                          "sourcePatternId",
+                          "createdAt"
+                        ]
+                      },
+                      "description": "The caller's patterns, generated and refined, most recently made first"
+                    },
+                    "nextCursor": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "Opaque; pass back unchanged. Null on the last page."
+                    }
+                  },
+                  "required": ["items", "nextCursor"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/edit": {
+      "post": {
+        "operationId": "patterns.refine.edit",
+        "summary": "Edit a pattern",
+        "description": "Starts a job that edits a pattern from a text instruction.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "A reference or another pattern to guide the edit; not a jewelry design"
+                  },
+                  "colors": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": { "type": "string", "minLength": 1 },
+                    "description": "#RRGGBB hex, or Arcade palette or Pantone color tokens"
+                  }
+                },
+                "required": ["requestId", "patternId", "instruction"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/editRegion": {
+      "post": {
+        "operationId": "patterns.refine.editRegion",
+        "summary": "Edit a region",
+        "description": "Starts a job that edits only the masked area of a pattern.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "mask": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "PNG data URL with the source revision's aspect ratio (the short side may differ by 1 pixel) and a long edge of at most 1536 pixels; it is scaled to the image the edit runs on. Pixels with alpha above 0 are editable, and the selection must cover at least 16 x 16 pixels at that size."
+                  }
+                },
+                "required": ["requestId", "patternId", "instruction", "mask"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/recolorClusters": {
+      "post": {
+        "operationId": "patterns.refine.recolorClusters",
+        "summary": "Retrieve color clusters",
+        "description": "Lists a pattern's dominant colors, to choose replacements for `recolor`.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to recolor; not a jewelry design"
+                  },
+                  "clusterCount": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 20,
+                    "description": "Omit to let the service choose; recolor must repeat the value"
+                  }
+                },
+                "required": ["requestId", "patternId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "clusters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clusterId": {
+                            "type": "string",
+                            "description": "Pass back to recolor with a new color"
+                          },
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-fA-F]{6}$",
+                            "description": "The cluster’s current color"
+                          }
+                        },
+                        "required": ["clusterId", "color"]
+                      }
+                    }
+                  },
+                  "required": ["clusters"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/recolor": {
+      "post": {
+        "operationId": "patterns.refine.recolor",
+        "summary": "Recolor a pattern",
+        "description": "Starts a job that replaces a pattern's dominant colors.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "colors": {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "clusterId": { "type": "string", "minLength": 1 },
+                        "color": {
+                          "type": "string",
+                          "pattern": "^#[0-9a-fA-F]{6}$",
+                          "description": "#RRGGBB"
+                        }
+                      },
+                      "required": ["clusterId", "color"]
+                    },
+                    "description": "One color for every cluster recolorClusters returned; at least one must change"
+                  },
+                  "clusterCount": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 20,
+                    "description": "Omit to let the service choose; recolor must repeat the value"
+                  }
+                },
+                "required": ["requestId", "patternId", "colors"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/crop": {
+      "post": {
+        "operationId": "patterns.refine.crop",
+        "summary": "Crop a pattern",
+        "description": "Starts a job that crops a pattern to a rectangle.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "rectangle": {
+                    "type": "object",
+                    "properties": {
+                      "left": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "top": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 16,
+                        "maximum": 9007199254740991
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 16,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["left", "top", "width", "height"],
+                    "description": "In the source revision's pixels"
+                  }
+                },
+                "required": ["requestId", "patternId", "rectangle"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/makeSeamless": {
+      "post": {
+        "operationId": "patterns.refine.makeSeamless",
+        "summary": "Make a pattern seamless",
+        "description": "Starts a job that turns a square region into a seamless repeat.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "tile": {
+                    "type": "object",
+                    "properties": {
+                      "left": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "top": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "size": {
+                        "type": "integer",
+                        "minimum": 16,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["left", "top", "size"],
+                    "description": "Square region, in the source revision's pixels, to turn into a seamless repeat tile"
+                  }
+                },
+                "required": ["requestId", "patternId", "tile"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/extendPattern": {
+      "post": {
+        "operationId": "patterns.refine.extendPattern",
+        "summary": "Extend a pattern",
+        "description": "Starts a job that extends a repeating pattern to a larger size.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetHeight": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 1536
+                  },
+                  "targetWidth": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 1536
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  }
+                },
+                "required": [
+                  "targetHeight",
+                  "targetWidth",
+                  "requestId",
+                  "patternId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/extendScene": {
+      "post": {
+        "operationId": "patterns.refine.extendScene",
+        "summary": "Extend a scene",
+        "description": "Starts a job that extends a non-repeating image beyond its edges.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetHeight": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 1536
+                  },
+                  "targetWidth": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 1536
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  }
+                },
+                "required": [
+                  "targetHeight",
+                  "targetWidth",
+                  "requestId",
+                  "patternId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/fixDeformity": {
+      "post": {
+        "operationId": "patterns.refine.fixDeformity",
+        "summary": "Fix deformities",
+        "description": "Starts a job that detects and repairs malformed details in a pattern.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "maxPasses": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Attempt a repair even when the scan finds no deformity"
+                  }
+                },
+                "required": ["requestId", "patternId", "maxPasses"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/refine/upscale": {
+      "post": {
+        "operationId": "patterns.refine.upscale",
+        "summary": "Upscale a pattern",
+        "description": "Not available through the API. Upscaling is a paid feature of Arcade Studio; requests fail with `403`.",
+        "tags": ["Refine"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to refine; not a jewelry design"
+                  },
+                  "expectedCreditCost": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "Highest credit cost you accept; rejected if the current cost is higher. Omit to accept the current cost."
+                  }
+                },
+                "required": ["requestId", "patternId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ],
+                  "description": "A download job; succeeded at once when this pattern was already upscaled"
+                }
+              }
+            }
+          }
+        },
+        "x-hidden": true
+      }
+    },
+    "/jobs/get": {
+      "post": {
+        "operationId": "jobs.get",
+        "summary": "Retrieve a job",
+        "description": "Retrieves a job. Poll until `status` is `succeeded` or `failed`.",
+        "tags": ["Jobs"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jobId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Opaque job ID; read the job with jobs.get"
+                  }
+                },
+                "required": ["jobId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                },
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "The product made from the pattern, for a patterns.create job with a categoryId"
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/createUpload": {
+      "post": {
+        "operationId": "references.createUpload",
+        "summary": "Create an upload URL",
+        "description": "Returns a signed URL to upload a reference image to. `PUT` the file, then call `references/create`.",
+        "tags": ["References"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image/gif",
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp"
+                    ],
+                    "type": "string",
+                    "description": "Content-Type of the file; references.create checks the bytes"
+                  },
+                  "byteLength": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 10485760,
+                    "exclusiveMinimum": 0,
+                    "description": "Declared file size, at most 10 MiB. The URL does not bind the size; references.create checks the stored bytes."
+                  }
+                },
+                "required": ["requestId", "mediaType", "byteLength"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uploadId": {
+                      "type": "string",
+                      "pattern": "^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\.(gif|jpg|png|webp)$",
+                      "description": "From createUpload; valid only for the caller that created it"
+                    },
+                    "uploadUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Signed URL to PUT the file bytes to. Host not guaranteed."
+                    },
+                    "method": { "const": "PUT" },
+                    "requiredHeaders": {
+                      "type": "object",
+                      "properties": { "Content-Type": { "type": "string" } },
+                      "required": ["Content-Type"],
+                      "description": "Headers the PUT must send exactly; the signature binds them"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The URL is rejected after this time"
+                    }
+                  },
+                  "required": [
+                    "uploadId",
+                    "uploadUrl",
+                    "method",
+                    "requiredHeaders",
+                    "expiresAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/create": {
+      "post": {
+        "operationId": "references.create",
+        "summary": "Create a reference",
+        "description": "Saves an uploaded image as a reference for `patterns/create`.",
+        "tags": ["References"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "uploadId": {
+                    "type": "string",
+                    "pattern": "^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\.(gif|jpg|png|webp)$",
+                    "description": "From references.createUpload, once the file was PUT"
+                  }
+                },
+                "required": ["requestId", "uploadId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Short-lived; read again to renew. Host not guaranteed."
+                    },
+                    "thumbnailUrl": { "type": "string", "format": "uri" },
+                    "width": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "height": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "mediaType": {
+                      "enum": [
+                        "image/gif",
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                      ],
+                      "type": "string"
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque ID of one uploaded reference image"
+                    },
+                    "createdAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "imageUrl",
+                    "thumbnailUrl",
+                    "width",
+                    "height",
+                    "mediaType",
+                    "referenceId",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/get": {
+      "post": {
+        "operationId": "references.get",
+        "summary": "Retrieve a reference",
+        "description": "Retrieves a reference image.",
+        "tags": ["References"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "referenceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Opaque ID of one uploaded reference image"
+                  }
+                },
+                "required": ["referenceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Short-lived; read again to renew. Host not guaranteed."
+                    },
+                    "thumbnailUrl": { "type": "string", "format": "uri" },
+                    "width": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "height": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "exclusiveMinimum": 0
+                    },
+                    "mediaType": {
+                      "enum": [
+                        "image/gif",
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                      ],
+                      "type": "string"
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque ID of one uploaded reference image"
+                    },
+                    "createdAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "imageUrl",
+                    "thumbnailUrl",
+                    "width",
+                    "height",
+                    "mediaType",
+                    "referenceId",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/references/list": {
+      "post": {
+        "operationId": "references.list",
+        "summary": "List references",
+        "description": "Lists your references, newest first.",
+        "tags": ["References"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ],
+                    "description": "nextCursor of the previous page; omit for the first page"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 60,
+                    "default": 24
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "imageUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Short-lived; read again to renew. Host not guaranteed."
+                          },
+                          "thumbnailUrl": { "type": "string", "format": "uri" },
+                          "width": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "exclusiveMinimum": 0
+                          },
+                          "height": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "exclusiveMinimum": 0
+                          },
+                          "mediaType": {
+                            "enum": [
+                              "image/gif",
+                              "image/jpeg",
+                              "image/png",
+                              "image/webp"
+                            ],
+                            "type": "string"
+                          },
+                          "referenceId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Opaque ID of one uploaded reference image"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "imageUrl",
+                          "thumbnailUrl",
+                          "width",
+                          "height",
+                          "mediaType",
+                          "referenceId",
+                          "createdAt"
+                        ]
+                      },
+                      "description": "Newest first. A reference that was refined or made into a product stays listed here and is also listed by patterns.list."
+                    },
+                    "nextCursor": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "Opaque; pass back unchanged. Null on the last page."
+                    }
+                  },
+                  "required": ["items", "nextCursor"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models/list": {
+      "post": {
+        "operationId": "models.list",
+        "summary": "List models",
+        "description": "Lists the models you can generate patterns with.",
+        "tags": ["Models"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "modelId": { "type": "string" },
+                          "name": { "type": "string" }
+                        },
+                        "required": ["modelId", "name"]
+                      },
+                      "description": "The generation models patterns.create accepts"
+                    }
+                  },
+                  "required": ["items"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/list": {
+      "post": {
+        "operationId": "categories.list",
+        "summary": "List categories",
+        "description": "Lists the product categories available to order. Each has a `world`, which says how its products are made.",
+        "tags": ["Categories"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "categoryId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Category ID, from categories.list"
+                          },
+                          "name": { "type": "string" },
+                          "imageUrl": {
+                            "anyOf": [
+                              { "type": "string", "format": "uri" },
+                              { "type": "null" }
+                            ],
+                            "description": "Category image; null when there is none. Host and lifetime not guaranteed."
+                          },
+                          "world": {
+                            "enum": ["print", "jewelry"],
+                            "type": "string",
+                            "description": "How products in this category are made. `print`: from a pattern, by products.create or by patterns.create with this categoryId. `jewelry`: from a design made for this category, only by patterns.create with this categoryId"
+                          },
+                          "category": {
+                            "type": "object",
+                            "properties": {
+                              "categoryId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Group ID; the categoryId of the group when it is also a category"
+                              },
+                              "name": { "type": "string" }
+                            },
+                            "required": ["categoryId", "name"],
+                            "description": "The group this category is in, such as Rings for Dainty Diamond Ring; absent when it has none"
+                          }
+                        },
+                        "required": ["categoryId", "name", "imageUrl", "world"]
+                      },
+                      "description": "The categories products can be made in"
+                    }
+                  },
+                  "required": ["items"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/get": {
+      "post": {
+        "operationId": "categories.get",
+        "summary": "Retrieve a category",
+        "description": "Retrieves a category and its options. Not every combination of option values can be made: send the values you have decided, in any number, and each value comes back with `available`, whether some product that can be made has that value together with every value you sent for the other options.\n\nIn a `print` category, walk to any product without guessing, one call for each value you add:\n\n1. Call with `selections: {}`. If the returned `selections` suits you, pass it to `products.create`.\n2. Otherwise pick a value with `available: true` for an option you have not sent, add it to `selections`, and call again.\n3. Repeat until `selections` suits you.\n\nChoosing only available values never dead-ends, and every product that can be made is reachable in any order. If the values you send cannot be made together, `canManufacture` is `false`: the values you sent that are marked unavailable are the conflict, and the available values of those options are the ways out.\n\nIn a `jewelry` category, the options show what its products can be. patterns.create picks the values from your prompt, so name the ones you want there; products.create refuses the category.",
+        "tags": ["Categories"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categoryId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Category ID, from categories.list"
+                  },
+                  "selections": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Option key, from categories.get"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Option value, from categories.get"
+                    },
+                    "description": "The values you have decided, option key to option value, in any number including none; options you leave out are open",
+                    "default": {}
+                  }
+                },
+                "required": ["categoryId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Category ID, from categories.list"
+                    },
+                    "name": { "type": "string" },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string",
+                            "description": "Option key, as used in selections"
+                          },
+                          "label": { "type": "string" },
+                          "values": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": { "type": "string" },
+                                "label": { "type": "string" },
+                                "isDefault": { "type": "boolean" },
+                                "available": {
+                                  "type": "boolean",
+                                  "description": "Whether some product that can be made has this value together with every value you sent for the other options"
+                                }
+                              },
+                              "required": [
+                                "value",
+                                "label",
+                                "isDefault",
+                                "available"
+                              ]
+                            }
+                          }
+                        },
+                        "required": ["key", "label", "values"]
+                      }
+                    },
+                    "selections": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Option key, from categories.get"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Option value, from categories.get"
+                      },
+                      "description": "A complete selection that keeps every value you sent: each open option takes its default where that can still be made, else another available value. In a `print` category, pass it to products.create when canManufacture is true"
+                    },
+                    "canManufacture": {
+                      "type": "boolean",
+                      "description": "Whether selections can be made; in a `print` category, products.create uses the lowest-priced maker that can make it. False when the values you sent cannot be made together, and selections then fills the open options with their defaults"
+                    },
+                    "world": {
+                      "enum": ["print", "jewelry"],
+                      "type": "string",
+                      "description": "How products in this category are made. `print`: from a pattern, by products.create or by patterns.create with this categoryId. `jewelry`: from a design made for this category, only by patterns.create with this categoryId"
+                    },
+                    "category": {
+                      "type": "object",
+                      "properties": {
+                        "categoryId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Group ID; the categoryId of the group when it is also a category"
+                        },
+                        "name": { "type": "string" }
+                      },
+                      "required": ["categoryId", "name"],
+                      "description": "The group this category is in, such as Rings for Dainty Diamond Ring; absent when it has none"
+                    }
+                  },
+                  "required": [
+                    "categoryId",
+                    "name",
+                    "options",
+                    "selections",
+                    "canManufacture",
+                    "world"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/create": {
+      "post": {
+        "operationId": "products.create",
+        "summary": "Create a product",
+        "description": "Starts a job that builds a product from a pattern, a category and its options. On success, `result.productId` is the new product. A `jewelry` category is refused; make jewelry with patterns.create.",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "patternId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The pattern to make it from; not a jewelry design"
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Category ID, from categories.list"
+                  },
+                  "selections": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Option key, from categories.get"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Option value, from categories.get"
+                    },
+                    "description": "The complete selection, as categories.get returns it"
+                  },
+                  "fit": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "crop": {
+                            "type": "object",
+                            "properties": {
+                              "height": {
+                                "type": "integer",
+                                "minimum": 16,
+                                "maximum": 9007199254740991
+                              },
+                              "left": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "top": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "width": {
+                                "type": "integer",
+                                "minimum": 16,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": ["height", "left", "top", "width"]
+                          },
+                          "mode": { "const": "crop" },
+                          "zoomLevel": {
+                            "anyOf": [
+                              { "const": 1 },
+                              { "const": 2 },
+                              { "const": 3 },
+                              { "const": 4 },
+                              { "const": 8 },
+                              { "const": 12 }
+                            ]
+                          }
+                        },
+                        "required": ["crop", "mode", "zoomLevel"]
+                      },
+                      {
+                        "type": "object",
+                        "properties": { "mode": { "const": "fill" } },
+                        "required": ["mode"],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "How the pattern fits the product; required when the pattern's aspect ratio does not match the selected size. A crop is in the pattern's pixels."
+                  }
+                },
+                "required": [
+                  "requestId",
+                  "patternId",
+                  "categoryId",
+                  "selections"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque job ID; read the job with jobs.get"
+                    },
+                    "kind": {
+                      "enum": ["pattern", "product", "download"],
+                      "type": "string",
+                      "description": "What the job makes: a pattern (patterns.create or a refine), a product (products.create) or a download (an upscale started in Arcade Studio)"
+                    },
+                    "status": {
+                      "enum": ["running", "succeeded", "failed"],
+                      "type": "string",
+                      "description": "Jobs are created running; there is no queued state"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "patternId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque ID of one pattern: an immutable image. A refine makes a new pattern."
+                                }
+                              },
+                              "required": ["patternId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Opaque product ID"
+                                }
+                              },
+                              "required": ["productId"]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "downloadUrl": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Short-lived; read the job again to renew"
+                                },
+                                "expiresAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "description": "The URL works at least until this time"
+                                }
+                              },
+                              "required": ["downloadUrl", "expiresAt"]
+                            }
+                          ]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "What a succeeded job made. Null while running, when it failed, when a deformity fix found nothing to repair, and once the pattern it made is deleted."
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" } },
+                          "required": ["message"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Why the job failed; set once it failed"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the job started; for a product with no recorded build (made by Create, or built before builds were kept), when the product was created"
+                    },
+                    "completedAt": {
+                      "anyOf": [
+                        { "type": "string", "format": "date-time" },
+                        { "type": "null" }
+                      ],
+                      "description": "When the job finished; null while running and for a failed product job, which does not record it"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "kind",
+                    "status",
+                    "result",
+                    "error",
+                    "createdAt",
+                    "completedAt"
+                  ],
+                  "description": "A product job; its result names the product once built"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/get": {
+      "post": {
+        "operationId": "products.get",
+        "summary": "Retrieve a product",
+        "description": "Retrieves a product with its images, maker and price. Pass `quantity` to price that quantity.",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Opaque product ID"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991,
+                    "default": 1,
+                    "description": "The quantity pricing is quoted for"
+                  }
+                },
+                "required": ["productId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Opaque product ID"
+                    },
+                    "title": { "type": "string" },
+                    "categoryId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Category ID, from categories.list"
+                    },
+                    "maker": {
+                      "type": "object",
+                      "properties": {
+                        "makerId": { "type": "string" },
+                        "name": { "type": "string" }
+                      },
+                      "required": ["makerId", "name"]
+                    },
+                    "selections": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Option key, from categories.get"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Option value, from categories.get"
+                      },
+                      "description": "The selection the product was made with, option value per option key"
+                    },
+                    "selectionLabel": {
+                      "type": "string",
+                      "description": "Human-readable summary of the selection"
+                    },
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Thumbnail of the primary product image. Short-lived; read again to renew. Host not guaranteed."
+                    },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "images": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Short-lived; read again to renew. Host not guaranteed."
+                          }
+                        },
+                        "required": ["url"]
+                      },
+                      "description": "Product images, primary first"
+                    },
+                    "description": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "Product details; null when they cannot be loaded"
+                    },
+                    "careInstructions": {
+                      "type": "string",
+                      "description": "Empty when there are none or they cannot be loaded right now"
+                    },
+                    "volumeDiscounts": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "minimumSpend": {
+                                    "type": "string",
+                                    "description": "Decimal amount"
+                                  },
+                                  "maximumSpend": {
+                                    "anyOf": [
+                                      { "type": "string" },
+                                      { "type": "null" }
+                                    ],
+                                    "description": "Decimal amount; null for the open-ended last tier"
+                                  },
+                                  "discountPercent": { "type": "number" }
+                                },
+                                "required": [
+                                  "minimumSpend",
+                                  "maximumSpend",
+                                  "discountPercent"
+                                ]
+                              }
+                            }
+                          },
+                          "required": ["currency", "tiers"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Spend tiers of the maker's volume discount; empty when it has none, and null when they are unavailable right now"
+                    },
+                    "patternId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The pattern the product was made from"
+                    },
+                    "unitPrice": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "The price of one unit when ordering quantity, before the volume discount; null while pricing is unavailable, so read again later"
+                    }
+                  },
+                  "required": [
+                    "productId",
+                    "title",
+                    "categoryId",
+                    "maker",
+                    "selections",
+                    "selectionLabel",
+                    "imageUrl",
+                    "createdAt",
+                    "images",
+                    "description",
+                    "careInstructions",
+                    "volumeDiscounts",
+                    "patternId",
+                    "unitPrice"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/list": {
+      "post": {
+        "operationId": "products.list",
+        "summary": "List products",
+        "description": "Lists your products, newest first.",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ],
+                    "description": "nextCursor of the previous page; omit for the first page"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 24
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Opaque product ID"
+                          },
+                          "title": { "type": "string" },
+                          "categoryId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Category ID, from categories.list"
+                          },
+                          "maker": {
+                            "type": "object",
+                            "properties": {
+                              "makerId": { "type": "string" },
+                              "name": { "type": "string" }
+                            },
+                            "required": ["makerId", "name"]
+                          },
+                          "selections": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Option key, from categories.get"
+                            },
+                            "additionalProperties": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Option value, from categories.get"
+                            },
+                            "description": "The selection the product was made with, option value per option key"
+                          },
+                          "selectionLabel": {
+                            "type": "string",
+                            "description": "Human-readable summary of the selection"
+                          },
+                          "imageUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Thumbnail of the primary product image. Short-lived; read again to renew. Host not guaranteed."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "patternId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The pattern the product was made from"
+                          }
+                        },
+                        "required": [
+                          "productId",
+                          "title",
+                          "categoryId",
+                          "maker",
+                          "selections",
+                          "selectionLabel",
+                          "imageUrl",
+                          "createdAt",
+                          "patternId"
+                        ]
+                      },
+                      "description": "Newest first. A new product appears once jobs.get reports its job succeeded; products.get adds images, copy and pricing."
+                    },
+                    "nextCursor": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "Opaque; pass back unchanged. Null on the last page."
+                    }
+                  },
+                  "required": ["items", "nextCursor"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkouts/create": {
+      "post": {
+        "operationId": "checkouts.create",
+        "summary": "Create a checkout",
+        "description": "Creates a checkout for your products. Open `checkoutUrl` to pay; the order is placed once payment completes. If any line has `quantity: 1`, set `\"dropShip\": true` in the request body unless you have an active subscription. Omitting `dropShip` or setting it to `false` without an active subscription returns `412 PRECONDITION_FAILED` for these lines.",
+        "tags": ["Checkouts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen idempotency key; a replay returns the original result"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Opaque product ID"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000
+                        }
+                      },
+                      "required": ["productId", "quantity"]
+                    },
+                    "description": "The caller's products to order, one line each"
+                  },
+                  "dropShip": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Adds the drop-ship service to the order. Defaults to false. Set to true if any line has quantity 1, unless you have an active subscription; otherwise the request returns 412 PRECONDITION_FAILED."
+                  }
+                },
+                "required": ["requestId", "lines"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checkoutId": {
+                      "type": "string",
+                      "pattern": "^\\d+$",
+                      "description": "The checkout's draft order ID; orders.get finds the order once it is placed"
+                    },
+                    "checkoutUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Hosted checkout page; host not guaranteed"
+                    }
+                  },
+                  "required": ["checkoutId", "checkoutUrl"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/get": {
+      "post": {
+        "operationId": "orders.get",
+        "summary": "Retrieve an order",
+        "description": "Retrieves an order by `orderId`, or by `checkoutId` once the checkout is paid. Returns `404` until then.",
+        "tags": ["Orders"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Order ID"
+                  },
+                  "checkoutId": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The checkout's draft order ID; orders.get finds the order once it is placed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "type": "string",
+                      "pattern": "^\\d+$",
+                      "description": "Order ID"
+                    },
+                    "orderCode": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "The Arcade order code; null when there is none"
+                    },
+                    "orderNumber": {
+                      "type": "string",
+                      "description": "Display name, e.g. \"#1042\""
+                    },
+                    "status": {
+                      "enum": [
+                        "ordered",
+                        "cadReview",
+                        "sampleReview",
+                        "inProduction",
+                        "inReview",
+                        "inCorrection",
+                        "approved",
+                        "updatedInfo",
+                        "shipped",
+                        "delivered",
+                        "fulfilled",
+                        "refunded"
+                      ],
+                      "type": "string",
+                      "description": "Derived from the makers' fulfillment and any refunds"
+                    },
+                    "placedAt": { "type": "string", "format": "date-time" },
+                    "total": {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "string",
+                          "description": "Decimal amount, e.g. \"48.00\""
+                        },
+                        "currency": {
+                          "type": "string",
+                          "description": "ISO 4217 code"
+                        }
+                      },
+                      "required": ["amount", "currency"]
+                    },
+                    "itemCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "imageUrl": {
+                      "anyOf": [
+                        { "type": "string", "format": "uri" },
+                        { "type": "null" }
+                      ],
+                      "description": "Short-lived; read again to renew. Host not guaranteed."
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Opaque product ID"
+                              },
+                              { "type": "null" }
+                            ],
+                            "description": "Set when the line is one of the caller's products"
+                          },
+                          "title": { "type": "string" },
+                          "selectionLabel": {
+                            "type": "string",
+                            "description": "Human-readable summary of the line's selection; the store's line title when the product is not the caller's"
+                          },
+                          "quantity": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "total": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "amount": {
+                                    "type": "string",
+                                    "description": "Decimal amount, e.g. \"48.00\""
+                                  },
+                                  "currency": {
+                                    "type": "string",
+                                    "description": "ISO 4217 code"
+                                  }
+                                },
+                                "required": ["amount", "currency"]
+                              },
+                              { "type": "null" }
+                            ],
+                            "description": "After line discounts"
+                          },
+                          "imageUrl": {
+                            "anyOf": [
+                              { "type": "string", "format": "uri" },
+                              { "type": "null" }
+                            ],
+                            "description": "Short-lived; read again to renew. Host not guaranteed."
+                          },
+                          "makerName": {
+                            "anyOf": [{ "type": "string" }, { "type": "null" }]
+                          }
+                        },
+                        "required": [
+                          "productId",
+                          "title",
+                          "selectionLabel",
+                          "quantity",
+                          "total",
+                          "imageUrl",
+                          "makerName"
+                        ]
+                      }
+                    },
+                    "subtotal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "shipping": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "tax": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "volumeDiscount": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "The makers' volume discount"
+                    },
+                    "discounts": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "Decimal amount, e.g. \"48.00\""
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "ISO 4217 code"
+                            }
+                          },
+                          "required": ["amount", "currency"]
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Other discounts, excluding the volume discount"
+                    },
+                    "shippingAddress": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "anyOf": [
+                                { "type": "string" },
+                                { "type": "null" }
+                              ]
+                            },
+                            "city": {
+                              "anyOf": [
+                                { "type": "string" },
+                                { "type": "null" }
+                              ]
+                            },
+                            "provinceCode": {
+                              "anyOf": [
+                                { "type": "string" },
+                                { "type": "null" }
+                              ]
+                            },
+                            "countryCode": {
+                              "anyOf": [
+                                { "type": "string" },
+                                { "type": "null" }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "city",
+                            "provinceCode",
+                            "countryCode"
+                          ]
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "tracking": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "company": {
+                            "anyOf": [{ "type": "string" }, { "type": "null" }]
+                          },
+                          "number": {
+                            "anyOf": [{ "type": "string" }, { "type": "null" }]
+                          },
+                          "url": {
+                            "anyOf": [
+                              { "type": "string", "format": "uri" },
+                              { "type": "null" }
+                            ]
+                          }
+                        },
+                        "required": ["company", "number", "url"]
+                      },
+                      "description": "Tracking of the shipments made so far"
+                    },
+                    "refunds": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "createdAt": {
+                            "anyOf": [
+                              { "type": "string", "format": "date-time" },
+                              { "type": "null" }
+                            ]
+                          },
+                          "amount": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "amount": {
+                                    "type": "string",
+                                    "description": "Decimal amount, e.g. \"48.00\""
+                                  },
+                                  "currency": {
+                                    "type": "string",
+                                    "description": "ISO 4217 code"
+                                  }
+                                },
+                                "required": ["amount", "currency"]
+                              },
+                              { "type": "null" }
+                            ]
+                          }
+                        },
+                        "required": ["createdAt", "amount"]
+                      }
+                    }
+                  },
+                  "required": [
+                    "orderId",
+                    "orderCode",
+                    "orderNumber",
+                    "status",
+                    "placedAt",
+                    "total",
+                    "itemCount",
+                    "imageUrl",
+                    "lines",
+                    "subtotal",
+                    "shipping",
+                    "tax",
+                    "volumeDiscount",
+                    "discounts",
+                    "shippingAddress",
+                    "tracking",
+                    "refunds"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/list": {
+      "post": {
+        "operationId": "orders.list",
+        "summary": "List orders",
+        "description": "Lists your orders, newest first.",
+        "tags": ["Orders"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ],
+                    "description": "nextCursor of the previous page; omit for the first page"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "default": 20
+                  },
+                  "status": {
+                    "enum": [
+                      "ordered",
+                      "cadReview",
+                      "sampleReview",
+                      "inProduction",
+                      "inReview",
+                      "inCorrection",
+                      "approved",
+                      "updatedInfo",
+                      "shipped",
+                      "delivered",
+                      "fulfilled",
+                      "refunded"
+                    ],
+                    "type": "string",
+                    "description": "Only orders in this status"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orderId": {
+                            "type": "string",
+                            "pattern": "^\\d+$",
+                            "description": "Order ID"
+                          },
+                          "orderCode": {
+                            "anyOf": [{ "type": "string" }, { "type": "null" }],
+                            "description": "The Arcade order code; null when there is none"
+                          },
+                          "orderNumber": {
+                            "type": "string",
+                            "description": "Display name, e.g. \"#1042\""
+                          },
+                          "status": {
+                            "enum": [
+                              "ordered",
+                              "cadReview",
+                              "sampleReview",
+                              "inProduction",
+                              "inReview",
+                              "inCorrection",
+                              "approved",
+                              "updatedInfo",
+                              "shipped",
+                              "delivered",
+                              "fulfilled",
+                              "refunded"
+                            ],
+                            "type": "string",
+                            "description": "Derived from the makers' fulfillment and any refunds"
+                          },
+                          "placedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "total": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "string",
+                                "description": "Decimal amount, e.g. \"48.00\""
+                              },
+                              "currency": {
+                                "type": "string",
+                                "description": "ISO 4217 code"
+                              }
+                            },
+                            "required": ["amount", "currency"]
+                          },
+                          "itemCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "imageUrl": {
+                            "anyOf": [
+                              { "type": "string", "format": "uri" },
+                              { "type": "null" }
+                            ],
+                            "description": "Short-lived; read again to renew. Host not guaranteed."
+                          },
+                          "lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "description": "Opaque product ID"
+                                    },
+                                    { "type": "null" }
+                                  ],
+                                  "description": "Set when the line is one of the caller's products"
+                                },
+                                "title": { "type": "string" },
+                                "selectionLabel": {
+                                  "type": "string",
+                                  "description": "Human-readable summary of the line's selection; the store's line title when the product is not the caller's"
+                                },
+                                "quantity": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "total": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "amount": {
+                                          "type": "string",
+                                          "description": "Decimal amount, e.g. \"48.00\""
+                                        },
+                                        "currency": {
+                                          "type": "string",
+                                          "description": "ISO 4217 code"
+                                        }
+                                      },
+                                      "required": ["amount", "currency"]
+                                    },
+                                    { "type": "null" }
+                                  ],
+                                  "description": "After line discounts"
+                                },
+                                "imageUrl": {
+                                  "anyOf": [
+                                    { "type": "string", "format": "uri" },
+                                    { "type": "null" }
+                                  ],
+                                  "description": "Short-lived; read again to renew. Host not guaranteed."
+                                },
+                                "makerName": {
+                                  "anyOf": [
+                                    { "type": "string" },
+                                    { "type": "null" }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "productId",
+                                "title",
+                                "selectionLabel",
+                                "quantity",
+                                "total",
+                                "imageUrl",
+                                "makerName"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "orderId",
+                          "orderCode",
+                          "orderNumber",
+                          "status",
+                          "placedAt",
+                          "total",
+                          "itemCount",
+                          "imageUrl",
+                          "lines"
+                        ]
+                      },
+                      "description": "Newest first"
+                    },
+                    "nextCursor": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }],
+                      "description": "Opaque; pass back unchanged. Null on the last page. With a status, a page can hold fewer than limit orders."
+                    }
+                  },
+                  "required": ["items", "nextCursor"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/create": {
+      "post": {
+        "operationId": "feedback.create",
+        "summary": "Send feedback",
+        "description": "Sends a report about the API to the Arcade team: what you expected, what happened, and the request and response involved. Leave out credentials and personal data; the server also drops URL query strings, API keys and credential fields before the team sees the report.\n\n`requestId` identifies the report. It is not an idempotency key: a retry after an error may deliver the report twice. Returns `503` while feedback is unavailable.",
+        "tags": ["Feedback"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Caller-chosen ID of the report; quote it to Arcade. Not an idempotency key: a retry may deliver the report twice."
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000,
+                    "description": "What you expected, what happened and what you tried"
+                  },
+                  "procedure": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "The procedure the report is about, e.g. \"patterns/create\""
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "body": { "description": "The JSON body you sent" },
+                      "userAgent": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "description": "The User-Agent you sent"
+                      }
+                    },
+                    "description": "The request the report is about"
+                  },
+                  "response": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 599,
+                        "description": "HTTP status; 0 when no response arrived"
+                      },
+                      "body": { "description": "The body you received" },
+                      "durationMs": { "type": "number", "minimum": 0 }
+                    },
+                    "description": "The response the report is about"
+                  },
+                  "agent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "The agent or client that filed the report, e.g. \"claude-code\""
+                  },
+                  "reportedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "When the issue was seen"
+                  }
+                },
+                "required": ["requestId", "text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Caller-chosen ID of the report; quote it to Arcade. Not an idempotency key: a retry may deliver the report twice."
+                    }
+                  },
+                  "required": ["requestId"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
