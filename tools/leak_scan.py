@@ -1,7 +1,7 @@
 """leak_scan.py -- the gate every push to this PUBLIC repo goes through.
 
 Fails if any tracked or staged file
-  * matches a term in the private deny list (path in $GOLD_DENY_LIST; the list is kept OUTSIDE
+  * matches a term in the private deny list ($GOLD_DENY_LIST, default ~/.config/gold/public_deny.txt; kept OUTSIDE
     this repo because it names private things),
   * is an image or other binary outside an allowlisted assets folder, or
   * looks like a secret (API keys, private keys, service-account JSON).
@@ -77,7 +77,8 @@ def main() -> int:
         hook = REPO / ".git" / "hooks" / "pre-push"
         hook.write_text(f'#!/bin/sh\n"{sys.executable}" "{REPO / "tools" / "leak_scan.py"}" || exit 1\n', encoding="utf-8")
         print(f"installed {hook}"); return 0
-    bad = scan(files(), deny_terms(os.environ.get("GOLD_DENY_LIST")))
+    default = Path.home() / ".config" / "gold" / "public_deny.txt"     # private, never in this repo
+    bad = scan(files(), deny_terms(os.environ.get("GOLD_DENY_LIST") or str(default)))
     for b in bad:
         print(b)
     print(f"leak_scan: {'CLEAN' if not bad else f'{len(bad)} problem(s)'}")
