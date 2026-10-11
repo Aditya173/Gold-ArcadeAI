@@ -1,5 +1,5 @@
 // Firestore + Storage rules. Run inside the emulators: npm run test:rules
-// The point: a published store's public copy is public; its evidence photos, owner uid and reading never are.
+// The point: creator kits and listed items are public; owner uids, readings, reasons and tokens never are; clients write nothing.
 const test = require('node:test');
 const { readFileSync } = require('fs');
 const { resolve } = require('path');
@@ -19,21 +19,15 @@ test.before(async () => {
   });
   await env.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
-    for (const [id, status] of [['s1', 'published'], ['s2', 'planned']]) {
-      await setDoc(doc(db, 'stores', id), { owner: OWNER, status, reading: { stub: true } });
-      await setDoc(doc(db, 'stores', id, 'products', 'p00'), { title: 'Band', why: 'Coastal walks appear in 29% of your moments.', status: 'designed' });
-      await setDoc(doc(db, 'stores', id, 'products', 'p04'), { title: 'Declined', why: 'declined piece', status: 'declined' });
-      await setDoc(doc(db, 'stores', id, 'private', 'evidence'), { photos: [PHOTO], products: { p00: [PHOTO] } });
-    }
-    await setDoc(doc(db, 'public', 's1'), { name: 'Store', about: null });
-    await setDoc(doc(db, 'public', 's1', 'products', 'p00'), { title: 'Band', why: null });
+    await setDoc(doc(db, 'users', OWNER), { role: 'creator', creatorId: 'c1' });
+    await setDoc(doc(db, 'users', OWNER, 'private', 'instagram'), { token: 'server-only' });
     await setDoc(doc(db, 'users', OWNER, 'insights', 'current'), { pack: 'creator_maya', reading: { stub: true } });
     await setDoc(doc(db, 'creators', 'c1'), { name: 'Kit', palette: [] });
     await setDoc(doc(db, 'creators', 'c1', 'private', 'assets'), { owner: OWNER, referenceIds: { logo: 'ref-1' } });
     await setDoc(doc(db, 'marketplace', 'i1'), { creatorId: 'c1', status: 'listed', title: 'Piece', stats: { buys: 0 } });
     await setDoc(doc(db, 'marketplace', 'i1', 'private', 'owner'), { makerUid: BUYER, owner_only: { fan_idea: 'x', why: 'y' } });
     await setDoc(doc(db, 'marketplace', 'i2'), { creatorId: 'c1', status: 'not_makeable', title: 'Nope' });
-    await setDoc(doc(db, 'orders', 'o1'), { buyer: BUYER, storeOwner: OWNER, storeId: 's1' });
+    await setDoc(doc(db, 'orders', 'o1'), { buyer: BUYER, storeOwner: OWNER, itemId: 'i1' });
     await uploadString(ref(ctx.storage(), PHOTO), 'jpegbytes', 'raw', { contentType: 'image/jpeg' });
   });
 });
@@ -42,49 +36,28 @@ test.after(() => env.cleanup());
 const anon = () => env.unauthenticatedContext();
 const user = (u) => env.authenticatedContext(u);
 
-test('public (signed out) reads the published copy and its products', async () => {
-  await assertSucceeds(getDoc(doc(anon().firestore(), 'public', 's1')));
-  await assertSucceeds(getDocs(collection(anon().firestore(), 'public', 's1', 'products')));
+test('users/{uid}: the owner reads it but cannot write it (role, creatorId come from the API); others cannot read', async () => {
+  await assertSucceeds(getDoc(doc(user(OWNER).firestore(), 'users', OWNER)));
+  await assertFails(setDoc(doc(user(OWNER).firestore(), 'users', OWNER), { role: 'creator', creatorId: 'forged' }));
+  await assertFails(updateDoc(doc(user(OWNER).firestore(), 'users', OWNER), { creatorId: 'forged' }));
+  await assertFails(setDoc(doc(user(BUYER).firestore(), 'users', BUYER), { role: 'fan' }));
+  await assertFails(getDoc(doc(user(BUYER).firestore(), 'users', OWNER)));
+  await assertFails(getDoc(doc(anon().firestore(), 'users', OWNER)));
 });
 
-test('the owner-only store doc (owner uid, reading) and its declined pieces are not public, even once published', async () => {
-  for (const ctx of [anon(), user(BUYER)]) {
-    await assertFails(getDoc(doc(ctx.firestore(), 'stores', 's1')));
-    await assertFails(getDocs(collection(ctx.firestore(), 'stores', 's1', 'products')));
-    await assertFails(getDoc(doc(ctx.firestore(), 'stores', 's1', 'products', 'p04')));
-  }
-  await assertSucceeds(getDoc(doc(user(OWNER).firestore(), 'stores', 's1', 'products', 'p04')));
+test('users/{uid}/private (Instagram token): no client reads or writes it, not even the owner', async () => {
+  await assertFails(getDoc(doc(user(OWNER).firestore(), 'users', OWNER, 'private', 'instagram')));
+  await assertFails(setDoc(doc(user(OWNER).firestore(), 'users', OWNER, 'private', 'instagram'), { token: 'x' }));
 });
 
-test('public store CANNOT read evidence: not the private doc, not the photo (signed out or another user)', async () => {
-  for (const ctx of [anon(), user(BUYER)]) {
-    await assertFails(getDoc(doc(ctx.firestore(), 'stores', 's1', 'private', 'evidence')));
-    await assertFails(getBytes(ref(ctx.storage(), PHOTO)));
-    await assertFails(getDownloadURL(ref(ctx.storage(), PHOTO)));
-  }
-});
-
-test('a draft store is owner-only', async () => {
-  await assertFails(getDoc(doc(anon().firestore(), 'stores', 's2')));
-  await assertFails(getDoc(doc(user(BUYER).firestore(), 'stores', 's2')));
-  await assertFails(getDocs(collection(user(BUYER).firestore(), 'stores', 's2', 'products')));
-  await assertSucceeds(getDoc(doc(user(OWNER).firestore(), 'stores', 's2')));
-});
-
-test('the owner reads their evidence and photos', async () => {
-  await assertSucceeds(getDoc(doc(user(OWNER).firestore(), 'stores', 's1', 'private', 'evidence')));
-  await assertSucceeds(getBytes(ref(user(OWNER).storage(), PHOTO)));
-});
-
-test('no client writes stores, products, evidence, public copies or orders (Functions only)', async () => {
-  const db = user(OWNER).firestore();
-  await assertFails(updateDoc(doc(db, 'stores', 's2'), { status: 'published' }));
-  await assertFails(setDoc(doc(db, 'stores', 's9'), { owner: OWNER, status: 'published' }));
-  await assertFails(updateDoc(doc(db, 'stores', 's1', 'products', 'p00'), { why: 'invented' }));
-  await assertFails(setDoc(doc(db, 'stores', 's1', 'private', 'evidence'), { photos: [] }));
+test('no client writes orders (Functions only)', async () => {
   await assertFails(setDoc(doc(user(BUYER).firestore(), 'orders', 'o2'), { buyer: BUYER }));
-  await assertFails(setDoc(doc(db, 'public', 's1'), { name: 'forged' }));
-  await assertFails(setDoc(doc(db, 'public', 's1', 'products', 'p00'), { why: 'invented' }));
+  await assertFails(updateDoc(doc(user(BUYER).firestore(), 'orders', 'o1'), { quantity: 9 }));
+});
+
+test('retired: stores/** and public/** are gone (denied)', async () => {
+  await assertFails(getDoc(doc(anon().firestore(), 'public', 's1')));
+  await assertFails(getDoc(doc(user(OWNER).firestore(), 'stores', 's1')));
 });
 
 test('attached insights: the owner reads them; nobody writes them, and nobody else reads them', async () => {

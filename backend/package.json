@@ -6,7 +6,9 @@
     "test": "cd functions && npm test",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-storefront \"node --test test/rules.test.js\"",
     "e2e": "firebase emulators:exec --only auth,firestore,functions --project demo-storefront \"node test/e2e.mjs\"",
-    "emulators": "firebase emulators:start --only auth,firestore,storage,functions --project demo-storefront"
+    "emulators": "firebase emulators:start --only auth,firestore,storage,functions --project demo-storefront",
+    "seed": "node scripts/seed.mjs",
+    "seed:fans": "node scripts/seed.mjs --fans-only"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

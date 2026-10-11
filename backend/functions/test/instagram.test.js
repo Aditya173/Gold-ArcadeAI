@@ -33,3 +33,54 @@ test('scrape (live, opt-in): one real logged-out fetch', { skip: process.env.INS
   assert.strictEqual(r.source, 'gallery-dl');
   assert.ok(r.images.length >= 1);
 });
+
+// ---- Connect Instagram (Meta API), INSTAGRAM_FAKE=1: no Meta account, no network ----
+// db: just enough of Firestore (db.doc(path).get/set) to see every write.
+function memDb() {
+  const docs = new Map();
+  return { docs, doc: (p) => ({ get: async () => ({ exists: docs.has(p), data: () => docs.get(p) }), set: async (d) => { docs.set(p, d); } }) };
+}
+async function connected(uid = 'u1') {
+  process.env.INSTAGRAM_FAKE = '1';
+  const db = memDb();
+  const { authUrl } = await ig.connect(db, uid);
+  const qs = Object.fromEntries(new URL(authUrl, 'http://x').searchParams);
+  return { db, qs, res: await ig.callback(db, qs) };
+}
+
+test('meta (fake): connect -> callback stores the token server-only, status says connected', async () => {
+  process.env.INSTAGRAM_FAKE = '1';
+  const db = memDb();
+  assert.deepStrictEqual(await ig.status(db, 'u1'), { connected: false, username: null });
+  await assert.rejects(ig.media(db, 'u1'), (e) => e.code === 'failed-precondition');
+  const { db: db2, qs, res } = await connected('u1');
+  assert.strictEqual(res.connected, true);
+  assert.deepStrictEqual([...db2.docs.keys()], ['users/u1/private/instagram'], 'the token is written only to the private doc');
+  assert.ok(db2.docs.get('users/u1/private/instagram').accessToken);
+  assert.ok(!JSON.stringify(res).includes('fake-token'), 'the token never goes back to the client');
+  assert.deepStrictEqual(await ig.status(db2, 'u1'), { connected: true, username: res.username });
+  // the state is signed: another uid or a tampered one is refused
+  for (const state of ['', qs.state.replace(/^u1/, 'u2'), qs.state.slice(0, -1) + (qs.state.endsWith('0') ? '1' : '0')]) {
+    await assert.rejects(ig.callback(memDb(), { ...qs, state }), (e) => e.code === 'permission-denied', state);
+  }
+});
+
+test('meta (fake): media is images only, the carousel flattened', async () => {
+  const { db } = await connected();
+  const { media } = await ig.media(db, 'u1');
+  assert.deepStrictEqual(media.map((m) => m.id), ['fake-1', 'fake-c1', 'fake-c2', 'fake-4']);
+  assert.ok(media.every((m) => m.mediaType === 'IMAGE' && m.mediaUrl && m.permalink && m.timestamp));
+  assert.strictEqual((await ig.media(db, 'u1', { limit: 2 })).media.length, 2);
+});
+
+test('meta (fake): fetchForOnboard returns instagram images as bytes; a foreign ID is a 400', async () => {
+  const { db } = await connected();
+  const imgs = await ig.fetchForOnboard(db, 'u1', ['fake-1', 'fake-c2']);
+  assert.deepStrictEqual(imgs.map((i) => [i.kind, i.mediaId, i.mediaType]), [['instagram', 'fake-1', 'image/png'], ['instagram', 'fake-c2', 'image/png']]);
+  for (const i of imgs) assert.deepStrictEqual([...Buffer.from(i.dataBase64, 'base64').subarray(0, 4)], [0x89, 0x50, 0x4e, 0x47], 'a PNG');
+  assert.deepStrictEqual(await ig.fetchForOnboard(db, 'u1', []), []);
+  for (const ids of [['someone-elses-post'], ['fake-v'], ['fake-c'], ['1', '2', '3', '4', '5']]) {
+    await assert.rejects(ig.fetchForOnboard(db, 'u1', ids), (e) => e.code === 'invalid-argument', ids.join());
+  }
+  await assert.rejects(ig.fetchForOnboard(memDb(), 'u1', ['fake-1']), (e) => e.code === 'failed-precondition', 'not connected');
+});

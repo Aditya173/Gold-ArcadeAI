@@ -1,47 +1,29 @@
 rules_version = '2';
-// Clients only READ. Every write goes through functions/ (admin SDK), so no client can mark a store
-// published, edit a why, or forge an order. stores/** (draft, owner uid, reading, evidence) is owner-only,
-// published or not. The public sees only public/{id}: what publish copied, as the owner opted in.
-// Brand-template marketplace: creators/{id} (public kit) and listed marketplace/{id} items are public; their
-// private/ docs (asset references; the fan's idea and why) are owner- or maker-only. Anything not matched below
-// is denied by default.
+// Clients only READ. Every write goes through functions/ (admin SDK), so no client can edit a why, list an item,
+// set its own role or forge an order.
+// creators/{id} (public kit) and listed marketplace/{id} items are public; their private/ docs (owner uid, asset
+// references; the maker's idea, why and reasons) are owner- or maker-only. users/{uid} (role, creatorId), the
+// attached Gold reading and the Instagram token are the owner's to read (the token: not even that). Anything not
+// matched below is denied by default.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function store(storeId) { return get(/databases/$(database)/documents/stores/$(storeId)).data; }
-    function ownsStore(storeId) { return signedIn() && store(storeId).owner == request.auth.uid; }
 
     match /users/{uid} {
-      allow read, write: if signedIn() && request.auth.uid == uid;
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;                     // role and creatorId are written only by the API
       match /insights/{doc} {                    // the attached Gold reading: written only by the API
         allow read: if signedIn() && request.auth.uid == uid;
         allow write: if false;
       }
-    }
-    match /stores/{storeId} {
-      allow read: if signedIn() && resource.data.owner == request.auth.uid;
-      allow write: if false;
-      match /products/{pid} {
-        allow read: if ownsStore(storeId);
-        allow write: if false;
-      }
-      match /private/{doc} {
-        allow read: if ownsStore(storeId);      // never public, published or not
-        allow write: if false;
-      }
-    }
-    match /public/{storeId} {
-      allow read: if true;
-      allow write: if false;
-      match /products/{pid} {
-        allow read: if true;
-        allow write: if false;
+      match /private/{doc} {                     // e.g. the Instagram token: server-only
+        allow read, write: if false;
       }
     }
     match /creators/{creatorId} {
       allow read: if true;
       allow write: if false;
-      match /private/{doc} {                     // owner uid, assets, Arcade referenceIds, full templates
+      match /private/{doc} {                     // owner uid, assets, Arcade referenceIds, styleRefs, full templates
         allow read: if signedIn() && resource.data.owner == request.auth.uid;
         allow write: if false;
       }
@@ -49,7 +31,7 @@ service cloud.firestore {
     match /marketplace/{itemId} {
       allow read: if resource.data.status == 'listed';   // a list query must filter status == 'listed'
       allow write: if false;
-      match /private/{doc} {                     // makerUid + owner_only {fan_idea, why}: the maker only
+      match /private/{doc} {                     // makerUid + owner_only {fan_idea, why, reasons}: the maker only
         allow read: if signedIn() && resource.data.makerUid == request.auth.uid;
         allow write: if false;
       }

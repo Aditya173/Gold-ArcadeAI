@@ -3,12 +3,14 @@
 // unless ARCADE_LIVE=1 (same guard as arcade.py; nobody sets it before the hackathon).
 const crypto = require('crypto');
 
+const UA = 'gold-arcade-app/0.1';   // explicit: some edges refuse the default undici agent
+
 class ArcadeError extends Error {
   constructor(status, body) { super(`${status} ${body && (body.message || body.code)}`); this.status = status; this.body = body; }
 }
 
 function client({ base = process.env.ARCADE_BASE_URL, key = process.env.ARCADE_API_KEY,
-  pollMs = Number(process.env.ARCADE_POLL_MS ?? 1000), maxPolls = 60, fetchImpl = fetch, sleep } = {}) {
+  pollMs = Number(process.env.ARCADE_POLL_MS ?? 1000), maxPolls = Number(process.env.ARCADE_MAX_POLLS || 80), fetchImpl = fetch, sleep } = {}) {
   if (!base) throw new Error('ARCADE_BASE_URL is not set (the mock: http://127.0.0.1:8787/v1)');
   const host = new URL(base).hostname;
   const local = ['127.0.0.1', 'localhost', '[::1]'].includes(host);
@@ -21,7 +23,7 @@ function client({ base = process.env.ARCADE_BASE_URL, key = process.env.ARCADE_A
     if (!local) fault = undefined;           // X-Mock-Fault is a mock drill: never sent to a non-local Arcade
     for (let attempt = 0; ; attempt++) {
       const res = await fetchImpl(`${base}/${proc}`, { method: 'POST', body: JSON.stringify(body),
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, ...(fault ? { 'X-Mock-Fault': fault } : {}) } });
+        headers: { 'Content-Type': 'application/json', 'User-Agent': UA, Authorization: `Bearer ${key}`, ...(fault ? { 'X-Mock-Fault': fault } : {}) } });
       const json = await res.json().catch(() => ({}));
       if (res.status === 429 && attempt < 3) { await nap(1000 * Number(res.headers.get('retry-after') || 1)); fault = undefined; continue; }
       if (!res.ok) throw new ArcadeError(res.status, json);
@@ -52,10 +54,16 @@ function client({ base = process.env.ARCADE_BASE_URL, key = process.env.ARCADE_A
     const product = await call('products/get', { productId: job.result.productId });
     return { ok: true, patternId: job.result.patternId, product, request: body };
   }
-  // = arcade.py reference: createUpload -> (PUT the bytes to uploadUrl) -> create; returns a referenceId (print only)
-  // ponytail: no PUT yet -- a brand kit carries asset metadata, not bytes; add the upload when kits carry files
-  async function reference(mediaType, byteLength, requestId) {
+  // = arcade.py reference: createUpload -> PUT the bytes to uploadUrl -> create; returns a referenceId (print only).
+  // The PUT sends exactly up.requiredHeaders: no Authorization (the uploadUrl is pre-signed).
+  // A number instead of bytes = the old metadata-only kit path (no PUT); live Arcade needs the bytes.
+  async function reference(mediaType, bytes, requestId) {
+    const byteLength = typeof bytes === 'number' ? bytes : bytes.length;
     const up = await call('references/createUpload', { requestId: `${requestId}-u`, mediaType, byteLength });
+    if (typeof bytes !== 'number') {
+      const res = await fetchImpl(up.uploadUrl, { method: up.method || 'PUT', headers: up.requiredHeaders || {}, body: bytes });
+      if (!res.ok) throw new ArcadeError(res.status, await res.json().catch(() => ({ message: 'upload PUT failed' })));
+    }
     return (await call('references/create', { requestId: `${requestId}-c`, uploadId: up.uploadId })).referenceId;
   }
   return { call, wait, design, reference, local };

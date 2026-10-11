@@ -23,18 +23,25 @@ async function ownStore(db, uid, storeId) {
 
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
 
+// role ('creator' | 'fan') goes on users/{uid} so the UI can restore the session (S0) after a reload
 async function attachInsights(db, uid, data) {
   const hit = packs.load((data || {}).pack);
   if (!hit) fail('invalid-argument', 'unknown pack (GET /packs lists them)');
+  const role = data.role;
+  if (role != null && !['creator', 'fan'].includes(role)) fail('invalid-argument', "role: 'creator' or 'fan'");
   const doc = { pack: data.pack, kind: hit.kind, reading: hit.reading, attachedAt: Date.now() };
-  await db.collection('users').doc(uid).collection('insights').doc('current').set(doc);
-  return doc;
+  const user = db.collection('users').doc(uid);
+  await user.collection('insights').doc('current').set(doc);
+  if (role) await user.set({ role }, { merge: true });
+  return { ...doc, role: role || null };
 }
 
 async function getInsights(db, uid) {
-  const s = await db.collection('users').doc(uid).collection('insights').doc('current').get();
+  const user = db.collection('users').doc(uid);
+  const [s, u] = await Promise.all([user.collection('insights').doc('current').get(), user.get()]);
   if (!s.exists) fail('not-found', 'no insights attached (POST /users/{uid}/insights)');
-  return s.data();
+  const { role = null, creatorId = null } = u.exists ? u.data() : {};
+  return { ...s.data(), role, creatorId };
 }
 
 // creatorId / templateId: reserved for the brand-template marketplace (creators/{id}, marketplace/{id}); null for now

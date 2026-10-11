@@ -140,6 +140,8 @@ class MockArcade:
         uid = f"{uuid.uuid4()}.{ext}"
         self.uploads = getattr(self, "uploads", {})
         self.uploads[uid] = body["mediaType"]
+        self.upload_len = getattr(self, "upload_len", {})
+        self.upload_len[uid] = body["byteLength"]
         return 200, {"uploadId": uid, "uploadUrl": f"{self.image_base}upload/{uid}", "method": "PUT",
                      "requiredHeaders": {"Content-Type": body["mediaType"]}, "expiresAt": _now()}, {}
 
@@ -150,6 +152,20 @@ class MockArcade:
         rid = "ref-" + body["uploadId"].split(".")[0][:8]
         return 200, {"imageUrl": f"{self.image_base}ref/{rid}.png", "thumbnailUrl": f"{self.image_base}ref/{rid}_t.png",
                      "width": 1024, "height": 1024, "mediaType": mt, "referenceId": rid, "createdAt": _now()}, {}
+
+    def put_upload(self, uid, data: bytes, headers) -> tuple:
+        """HTTP PUT to an uploadUrl: exactly requiredHeaders (Content-Type), no Authorization, byteLength bytes."""
+        with self.lock:
+            mt = getattr(self, "uploads", {}).get(uid)
+            if mt is None:
+                return _err(404, "NOT_FOUND", "unknown upload (mock)")
+            if headers.get("Authorization"):
+                return _err(400, "BAD_REQUEST", "the uploadUrl is pre-signed: send no Authorization (mock)")
+            if headers.get("Content-Type") != mt or len(data) != self.upload_len[uid]:
+                return _err(400, "BAD_REQUEST", f"want Content-Type {mt} and {self.upload_len[uid]} bytes (mock)")
+            self.uploaded = getattr(self, "uploaded", {})
+            self.uploaded[uid] = data
+            return 200, {}, {}
 
     def _cat(self, cid):
         return self.categories.get(cid)
@@ -294,6 +310,12 @@ def serve(port: int, mock: MockArcade | None = None, ready: threading.Event | No
             if self.path.startswith("/mock/placeholder/"):
                 return self._send(200, PLACEHOLDER, ctype="image/svg+xml")
             self._send(404, {"code": "NOT_FOUND", "message": "POST /v1/<procedure>"})
+
+        def do_PUT(self):
+            if not self.path.startswith("/mock/upload/"):
+                return self._send(404, {"code": "NOT_FOUND", "message": "PUT /mock/upload/<uploadId>"})
+            data = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            self._send(*mock.put_upload(self.path.rsplit("/", 1)[1], data, self.headers))
 
         def do_POST(self):
             if not self.path.startswith("/v1/"):
@@ -467,6 +489,16 @@ def _selftest() -> None:
     ok(post("jobs/get", {"jobId": fj})[1]["error"]["message"] == NO_MAKER, "server: job_fail fault")
     st, co, _ = post("checkouts/create", {"requestId": "c1", "lines": [{"productId": prod["productId"], "quantity": 1}]})
     ok(st == 200 and co["mock"] and co["checkoutUrl"], "server: checkoutUrl (the app stops here)")
+    up = post("references/createUpload", {"requestId": "u1", "mediaType": "image/png", "byteLength": 4})[1]
+    put = lambda h: urllib.request.urlopen(urllib.request.Request(up["uploadUrl"].replace("127.0.0.1:0", f"127.0.0.1:{box[0].server_port}"),
+                                                                  data=b"\x89PNG", headers=h, method=up["method"]), timeout=10).status
+    try:
+        put({**up["requiredHeaders"], "Authorization": f"Bearer {K}"})
+        raise AssertionError("PUT with Authorization must be refused")
+    except urllib.error.HTTPError as e:
+        ok(e.code == 400, "server: upload PUT refuses Authorization")
+    ok(put(up["requiredHeaders"]) == 200, "server: upload PUT stores the bytes")
+    ok(post("references/create", {"requestId": "c-u1", "uploadId": up["uploadId"]})[1]["referenceId"].startswith("ref-"), "server: PUT -> references/create")
     with urllib.request.urlopen(f"{base}/mock/placeholder/x.svg", timeout=10) as r:
         ok(b"MOCK" in r.read(), "server: placeholder image")
     box[0].shutdown()

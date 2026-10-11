@@ -150,8 +150,20 @@ async function createCreator(db, uid, data, { arc = arcade.client() } = {}) {
 async function getCreator(db, data) {
   const s = await db.collection('creators').doc(data.creatorId).get();
   if (!s.exists) fail('not-found', 'no such creator');
-  return s.data();
+  const d = s.data();
+  return { ...d, name: d.name, handle: d.handle || null, palette: d.palette || [], styleWords: d.styleWords || [], instagram: d.instagram || null };
 }
+
+// kit categories that arcade.pick does not know by that exact name
+const CAT_ALIAS = { 'ceramic plate': 'ceramic', 'table runner': 'textile' };
+const pickCat = (cats, category) => arcade.pick(cats, category) || arcade.pick(cats, CAT_ALIAS[category]);
+// print referenceIds (2.6): the creator's chosen styleRefs, else the template's assets; at most 3. Jewelry: none.
+const refsFor = (t, priv) => (t.world === 'print'
+  ? ((priv.styleRefs && priv.styleRefs.length ? priv.styleRefs : (t.uses_assets || []).map((a) => (priv.referenceIds || {})[a])).filter(Boolean).slice(0, 3))
+  : undefined);
+const productFields = (p) => ({ productId: p.productId, imageUrl: p.imageUrl || null, images: (p.images || []).map((i) => i.url || i).filter(Boolean),
+  price: p.unitPrice || null, selectionLabel: p.selectionLabel || null, makerName: (p.maker || {}).name || null,
+  description: p.description || null, imageFetchedAt: Date.now() });
 
 // the fan's reading comes from their attached insight pack (users/{uid}/insights/current)
 async function makeItem(db, uid, data, { arc = arcade.client(), plan = planItem } = {}) {
@@ -169,10 +181,9 @@ async function makeItem(db, uid, data, { arc = arcade.client(), plan = planItem 
   const errs = item ? checkItem(item, k, t, r) : ['no plan'];
   if (errs.length) fail('failed-precondition', `item rejected: ${errs.join('; ')}`);
   const itemId = 'itm-' + crypto.createHash('sha256').update(`${k.creatorId}|${uid}|${t.templateId}|${item.brief}`).digest('hex').slice(0, 12);
-  const cat = arcade.pick((await arc.call('categories/list', {})).items, t.category);
+  const cat = pickCat((await arc.call('categories/list', {})).items, t.category);
   const rec = cat ? await arc.design(item.brief, cat.categoryId, { requestId: itemId,
-    colors: t.world === 'print' ? item.colors : undefined,
-    referenceIds: t.world === 'print' ? t.uses_assets.map((a) => priv.referenceIds[a]).filter(Boolean) : undefined })
+    colors: t.world === 'print' ? item.colors : undefined, referenceIds: refsFor(t, priv) })
     : { ok: false, reason: `no category for ${t.category}` };
   const showTag = !k.rules.public_tag_requires_opt_in || data.showTag === true;
   const doc = { itemId, creatorId: k.creatorId, templateId: t.templateId, category: t.category, world: t.world, title: item.title,
@@ -188,38 +199,196 @@ async function makeItem(db, uid, data, { arc = arcade.client(), plan = planItem 
   return { ...doc, owner_only: { fan_idea: item.fan_idea, why: item.why_owner } };
 }
 
-// ponytail: in-memory sort over the creator's listed items; add orderBy + a composite index when feeds grow
-async function feed(db, data) {
-  const q = await db.collection('marketplace').where('creatorId', '==', data.creatorId).where('status', '==', 'listed').get();
-  const xs = q.docs.map((d) => d.data());
-  xs.sort(data.sort === 'popular' ? (a, b) => b.stats.buys - a.stats.buys || b.createdAt - a.createdAt : (a, b) => b.createdAt - a.createdAt);
-  return { creatorId: data.creatorId, sort: data.sort === 'popular' ? 'popular' : 'new', items: xs };
+// ---- suggestions (2.6) ----
+// where a category lives, matched against the reading's places[] (pendant/jewelry: nowhere in particular)
+const PLACES = { textile: ['dining table', 'kitchen'], 'ceramic plate': ['dining table', 'kitchen'], ceramic: ['dining table', 'kitchen'],
+  'wall art print': ['kitchen'], 'throw pillow': ['living room', 'home'], rug: ['living room', 'home'] };
+
+// the "why we chose this" list, built from data we already hold so every line is true (never written by the model)
+function buildReasons(item, k, t, r) {
+  const out = [];
+  const idea = r.signature.find((s) => s.idea === item.fan_idea);
+  if (idea) out.push({ kind: 'insight', idea: idea.idea, share: pct(idea.share_of_events),
+    text: `${cap(idea.idea)} shows up in ${pct(idea.share_of_events)} of your moments.` });
+  const roll = new Map(r.palette.map((c) => [c.hex, c.name]));
+  const brand = new Map(k.palette.map((c) => [c.hex, c.name]));
+  const cols = (item.colors || []).map((h) => String(h).toLowerCase()).map((hex) => (roll.has(hex)
+    ? { hex, name: roll.get(hex), from: 'your roll', label: 'from your roll' }
+    : { hex, name: brand.get(hex) || hex, from: 'creator', label: `from ${k.name}'s palette` }));
+  if (cols.length) out.push({ kind: 'colour', colors: cols, text: cols.map((c) => `${cap(c.name)} ${c.label}`).join('; ') + '.' });
+  else {
+    const low = (item.brief || '').toLowerCase();
+    const metal = ((t.slots || {}).metal || []).find((m) => low.includes(m.toLowerCase()));
+    out.push({ kind: 'colour', colors: [], text: `${metal ? cap(metal) : 'Metal'} only: jewelry carries no print colours.` });
+  }
+  const el = t.required_brand_element.find((e) => (item.brief || '').toLowerCase().includes(e.toLowerCase()));
+  if (el) out.push({ kind: 'style', element: el, text: `${cap(el)} comes from ${k.name}'s style.` });
+  const want = PLACES[t.category] || [];
+  const place = (r.places || []).find((p) => want.includes(p.type));
+  out.push(place
+    ? { kind: 'product', place: place.type, text: `A ${t.category} for the ${place.type}, where ${pct(place.share_of_events)} of your moments happen.` }
+    : { kind: 'product', place: null, text: `A ${t.category} from ${k.name}'s collection, worn rather than placed.` });
+  return out;
 }
 
-async function getItem(db, uid, data) {
+const itemIdFor = (uid, creatorId, templateId) => arcade.rid(uid, creatorId, templateId);
+const ownerView = (pub, priv) => ({ itemId: pub.itemId, category: pub.category, status: pub.status, title: pub.title || null,
+  description: pub.description || null, maker: pub.maker || null, imageUrl: pub.imageUrl || null, price: pub.price || null,
+  why: ((priv || {}).owner_only || {}).why || null, reasons: ((priv || {}).owner_only || {}).reasons || [], reason: pub.reason || null });
+
+async function loadCreator(db, creatorId) {
+  if (!ID.test(creatorId || '')) fail('invalid-argument', 'creatorId missing');
+  const c = db.collection('creators').doc(creatorId);
+  const [ps, vs] = await Promise.all([c.get(), c.collection('private').doc('assets').get()]);
+  if (!ps.exists || !vs.exists) fail('not-found', 'no such creator');
+  const pub = ps.data(), priv = vs.data();
+  return { pub, priv, k: { ...pub, assets: priv.assets || [], templates: priv.templates || [] } };
+}
+
+// POST /suggest {creatorId, count?=4}: one item per kit template (first `count`), each final before we answer
+async function suggest(db, uid, data = {}, { arc, plan = planItem, faults = {} } = {}) {   // faults: tests only (mock X-Mock-Fault per templateId)
+  const { pub, priv, k } = await loadCreator(db, data.creatorId);
+  const ins = await db.collection('users').doc(uid).collection('insights').doc('current').get();
+  if (!ins.exists) fail('failed-precondition', 'attach a Gold reading first (POST /users/{uid}/insights)');
+  const r = ins.data().reading;
+  const count = Math.min(Math.max(parseInt(data.count ?? 4, 10) || 4, 1), k.templates.length);
+  const maker = priv.owner === uid ? 'creator' : 'fan';
+  let cats;
+  const categories = () => (cats ||= (arc ||= arcade.client()).call('categories/list', {}).then((x) => x.items));
+  const showTag = !(k.rules || {}).public_tag_requires_opt_in || data.showTag === true;
+
+  async function one(t) {
+    const itemId = itemIdFor(uid, k.creatorId, t.templateId);
+    const m = db.collection('marketplace').doc(itemId), o = m.collection('private').doc('owner');
+    const [ps, os] = await Promise.all([m.get(), o.get()]);
+    const prev = ps.exists ? ps.data() : null;
+    if (prev && prev.status === 'listed') return ownerView(prev, os.exists ? os.data() : null);   // idempotent rerun
+    const attempts = prev ? (prev.attempts || 0) + (prev.status === 'not_makeable' ? 1 : 0) : 0;
+    const base = { itemId, creatorId: k.creatorId, creatorName: k.name, creatorHandle: k.handle || null, templateId: t.templateId,
+      category: t.category, world: t.world, maker, title: (prev && prev.title) || null, attempts,
+      stats: (prev && prev.stats) || { buys: 0 }, createdAt: (prev && prev.createdAt) || Date.now() };
+    await o.set({ makerUid: uid, owner_only: (os.exists && os.data().owner_only) || {} });
+    await m.set({ ...base, status: 'generating', reason: null });
+    let doc, owner;
+    try {
+      const { item, model } = await plan(k, t, r);
+      const errs = item ? checkItem(item, k, t, r) : ['no plan'];
+      if (errs.length) throw new Error(`item rejected: ${errs.join('; ')}`);
+      owner = { fan_idea: item.fan_idea, why: item.why_owner ?? null, reasons: buildReasons(item, k, t, r) };
+      await o.set({ makerUid: uid, owner_only: owner, public_tag: item.public_tag ?? null });
+      const words = (pub.styleWords || []).length ? ` Style: ${pub.styleWords.join(', ')}.` : '';
+      const fields = { ...base, title: item.title ?? null, brief: item.brief, colors: item.colors || [], public_tag: showTag ? (item.public_tag ?? null) : null,
+        royalty_pct: (k.rules || {}).royalty_pct ?? null, model };
+      const cat = pickCat(await categories(), t.category);
+      if (!cat) throw new Error(`no Arcade category for ${t.category}`);
+      const rec = await arc.design(item.brief + words, cat.categoryId, { requestId: `${itemId}-${attempts}`,
+        colors: t.world === 'print' ? item.colors : undefined, referenceIds: refsFor(t, priv), fault: faults[t.templateId] });
+      doc = rec.ok ? { ...fields, status: 'listed', reason: null, ...productFields(rec.product) }
+        : { ...fields, status: 'not_makeable', reason: rec.reason || 'Arcade could not make this piece' };
+    } catch (e) {
+      doc = { ...base, status: 'not_makeable', reason: String((e && e.message) || e) };
+    }
+    await m.set(doc);
+    return ownerView(doc, { owner_only: owner || {} });
+  }
+  const settled = await Promise.allSettled(k.templates.slice(0, count).map(one));
+  return { items: settled.map((s, i) => (s.status === 'fulfilled' ? s.value
+    : { itemId: itemIdFor(uid, k.creatorId, k.templates[i].templateId), category: k.templates[i].category, status: 'not_makeable',
+      title: null, description: null, maker, imageUrl: null, price: null, why: null, reasons: [], reason: String(s.reason && s.reason.message) })) };
+}
+
+// GET /suggestions?creatorId=&count=3: the caller's items so far (deterministic ids -> one getAll; missing skipped)
+async function suggestions(db, uid, q = {}) {
+  const { k } = await loadCreator(db, q.creatorId);
+  const count = Math.min(Math.max(parseInt(q.count ?? 3, 10) || 3, 1), k.templates.length);
+  const ms = k.templates.slice(0, count).map((t) => db.collection('marketplace').doc(itemIdFor(uid, k.creatorId, t.templateId)));
+  if (!ms.length) return { items: [] };
+  const snaps = await db.getAll(...ms, ...ms.map((m) => m.collection('private').doc('owner')));
+  const items = [];
+  ms.forEach((m, i) => {
+    const s = snaps[i], p = snaps[i + ms.length];
+    if (s.exists && p.exists && p.data().makerUid === uid) items.push(ownerView(s.data(), p.data()));
+  });
+  return { items };
+}
+
+// ---- universal marketplace (2.9) ----
+const STALE_MS = 10 * 60 * 1000;
+async function refresh(db, items, arc) {
+  const due = items.filter((it) => it.productId && (it.price == null || !it.imageFetchedAt || Date.now() - it.imageFetchedAt > STALE_MS)).slice(0, 12);
+  if (!due.length) return;
+  let a;
+  try { a = arc || arcade.client(); } catch { return; }      // no Arcade configured: keep the stored values
+  await Promise.allSettled(due.map(async (it) => {
+    const p = await a.call('products/get', { productId: it.productId });
+    const upd = { imageUrl: p.imageUrl || it.imageUrl, images: (p.images || []).map((i) => i.url || i).filter(Boolean), price: p.unitPrice || null, imageFetchedAt: Date.now() };
+    Object.assign(it, upd);
+    await db.collection('marketplace').doc(it.itemId).update(upd);
+  }));
+}
+const feedItem = (it, mine) => { const { brief, model, attempts, ...pub } = it; return { ...pub, stats: { buys: (it.stats || {}).buys || 0 }, mine }; };
+
+// GET /marketplace?sort=new|popular&creatorId=&category=&maker=  (one query; filter + sort in memory)
+// ponytail: in-memory filter, add composite indexes past ~1,000 items
+async function feed(db, uid, q = {}, { arc } = {}) {
+  let xs = (await db.collection('marketplace').where('status', '==', 'listed').get()).docs.map((d) => d.data());
+  if (q.creatorId) xs = xs.filter((x) => x.creatorId === q.creatorId);
+  if (q.category) xs = xs.filter((x) => x.category === q.category);
+  if (q.maker) xs = xs.filter((x) => x.maker === q.maker);
+  const popular = q.sort === 'popular';
+  xs.sort(popular ? (a, b) => ((b.stats || {}).buys || 0) - ((a.stats || {}).buys || 0) || b.createdAt - a.createdAt : (a, b) => b.createdAt - a.createdAt);
+  await refresh(db, xs, arc);
+  let mine = xs.map(() => false);
+  if (uid && xs.length) {     // ponytail: one batched read per feed; store a makerUid hash on the public doc past ~1,000 items
+    const ps = await db.getAll(...xs.map((x) => db.collection('marketplace').doc(x.itemId).collection('private').doc('owner')));
+    mine = ps.map((p) => p.exists && p.data().makerUid === uid);
+  }
+  return { sort: popular ? 'popular' : 'new', items: xs.map((x, i) => feedItem(x, mine[i])) };
+}
+
+// GET /creators?q=  (Wishbone Kitchen first; listedCount computed from the one listed query)
+const FEATURED = 'creator-wishbonekitchen';
+async function listCreators(db, q = {}) {
+  const [cs, ls] = await Promise.all([db.collection('creators').get(), db.collection('marketplace').where('status', '==', 'listed').get()]);
+  const n = {};
+  for (const d of ls.docs) { const c = d.data().creatorId; n[c] = (n[c] || 0) + 1; }
+  const needle = String(q.q || '').trim().toLowerCase().replace(/^@/, '');
+  let xs = cs.docs.map((d) => d.data()).map((c) => ({ creatorId: c.creatorId, name: c.name, handle: c.handle || null,
+    instagram: c.instagram || null, palette: c.palette || [], listedCount: n[c.creatorId] || 0 }));
+  if (needle) xs = xs.filter((c) => [c.name, c.handle, c.instagram, c.creatorId].some((v) => String(v || '').toLowerCase().replace(/^@/, '').includes(needle)));
+  xs.sort((a, b) => (b.creatorId === FEATURED) - (a.creatorId === FEATURED) || b.listedCount - a.listedCount || String(a.name).localeCompare(String(b.name)));
+  return { creators: xs };
+}
+
+async function getItem(db, uid, data, { arc } = {}) {
   const m = db.collection('marketplace').doc(data.itemId);
   const [s, p] = await Promise.all([m.get(), m.collection('private').doc('owner').get()]);
-  const mine = uid && p.exists && p.data().makerUid === uid;
+  const mine = !!(uid && p.exists && p.data().makerUid === uid);
   if (!s.exists || (s.data().status !== 'listed' && !mine)) fail('not-found', 'no such item');
-  return mine ? { ...s.data(), owner_only: p.data().owner_only } : s.data();
+  const it = s.data();
+  if (it.status === 'listed') await refresh(db, [it], arc);
+  if (!mine) return { ...it, mine: false };
+  const oo = p.data().owner_only || {};
+  return { ...it, mine: true, owner_only: oo, owner: { why: oo.why || null, fan_idea: oo.fan_idea || null, reasons: oo.reasons || [] } };
 }
 
-async function buy(db, uid, data, { arc = arcade.client() } = {}) {
+async function buy(db, uid, data, { arc } = {}) {
   const quantity = data.quantity ?? 1;
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) fail('invalid-argument', 'quantity: an integer 1-20');
   const m = db.collection('marketplace').doc(data.itemId);
   const s = await m.get();
   if (!s.exists || s.data().status !== 'listed') fail('not-found', 'no such listed item');
   const it = s.data();
-  const co = await arc.call('checkouts/create', { requestId: arcade.rid('buy', uid, data.itemId, quantity, it.stats.buys),
+  if (it.category === 'ring') fail('failed-precondition', 'rings need a size, which a checkout line cannot carry yet');
+  const co = await (arc || arcade.client()).call('checkouts/create', { requestId: arcade.rid('buy', uid, data.itemId, quantity, (it.stats || {}).buys || 0),
     lines: [{ productId: it.productId, quantity }], dropShip: quantity === 1 });
   const creatorOwner = ((await db.collection('creators').doc(it.creatorId).collection('private').doc('assets').get()).data() || {}).owner || null;
   const order = db.collection('orders').doc();
   await order.set({ buyer: uid, itemId: data.itemId, creatorId: it.creatorId, storeOwner: creatorOwner, productId: it.productId, quantity,
-    checkoutId: co.checkoutId, checkoutUrl: co.checkoutUrl, mock: co.mock === true, status: 'checkout_created', createdAt: Date.now() });
+    checkoutId: co.checkoutId || null, checkoutUrl: co.checkoutUrl, mock: co.mock === true, status: 'checkout_created', createdAt: Date.now() });
   await m.update({ 'stats.buys': FieldValue.increment(1) });
-  return { orderId: order.id, checkoutUrl: co.checkoutUrl, mock: co.mock === true };
+  return { orderId: order.id, checkoutId: co.checkoutId || null, checkoutUrl: co.checkoutUrl, mock: co.mock === true };
 }
 
-module.exports = { validateKit, checkItem, templateFill, planItem, publicKit, userMsg, fixture, SYSTEM,
-  createCreator, getCreator, makeItem, feed, getItem, buy };
+module.exports = { validateKit, checkItem, templateFill, planItem, publicKit, userMsg, fixture, SYSTEM, buildReasons, itemIdFor,
+  createCreator, getCreator, makeItem, suggest, suggestions, feed, listCreators, getItem, buy };
