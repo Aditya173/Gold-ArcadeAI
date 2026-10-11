@@ -16,6 +16,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 BINARY = re.compile(r"\.(jpe?g|png|heic|webp|gif|npy|safetensors|mlpackage|zip|pdf)$", re.I)
+# exact files allowed where they are (partner uploads at the repo root: demo Instagram/brand screenshots)
+ASSET_FILES = {"IMG_5332.jpg", "IMG_5333.jpg", "IMG_5334.jpg", "IMG_5335.jpg", "INSTAGRAM 1.png", "INSTAGRAM 2.png"}
 ASSET_OK = ("storefront-app/assets/", "marketplace/fixtures/fake_products/images/", "marketplace/fixtures/images/", "docs/screens/")
 SECRETS = [re.compile(p) for p in (r"sk-ant-[A-Za-z0-9_-]{20,}", r"arcade_sk_live_[A-Za-z0-9]{8,}",
                                    r"-----BEGIN [A-Z ]*PRIVATE KEY-----", r'"private_key_id"\s*:', r"AIza[0-9A-Za-z_-]{30,}")]
@@ -39,7 +41,7 @@ def scan(paths: list[str], terms: list[re.Pattern], read=lambda p: (REPO / p).re
     for p in paths:
         if p == "tools/leak_scan.py":
             continue
-        if BINARY.search(p) and not p.startswith(ASSET_OK):
+        if BINARY.search(p) and not (p.startswith(ASSET_OK) or p in ASSET_FILES):
             bad.append(f"{p}: binary/image file")
             continue
         if BINARY.search(p):
