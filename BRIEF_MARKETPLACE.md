@@ -323,6 +323,27 @@ marketplace isn't empty), then record the fan section.
 Recording rules: record against the mock for timing safety, then re-record S4/S6/S9 against live Arcade if a
 working key exists (Part 2, 2.10). Speed up generating waits; do not fake results.
 
+## 1.2b Shopify, via the Arcade AI plugin (placeholder for the hackathon)
+
+In the real product, the marketplace runs on the creator's **Shopify** store through **Arcade's plugin for
+Shopify**: products made here are published to the creator's store with their own markup, Shopify takes the
+payment, and Arcade's makers produce and ship each order. **Nothing calls Shopify today.** The UI shows where it
+fits, using static placeholder copy only:
+
+| Where | Placeholder element (static, no API) |
+|---|---|
+| S0 nav (creator) | A "Shopify" item with a "Connect your store (Arcade AI plugin)" label and a "Coming soon" state |
+| S6 (creator), each listed card | A disabled **"Publish to Shopify"** action with the note "Publishes through the Arcade AI plugin in your Shopify store" |
+| S7 product page | A line "Sold through {creatorName}'s Shopify store · made to order by Arcade" |
+| S8 marketplace | A "Powered by Shopify + Arcade" note in the page footer |
+| S9 checkout | A note "In the live product, checkout is the creator's Shopify checkout" above the demo confirmation |
+
+Video: one shot (about 5 s) on the S6 creator card pointing at "Publish to Shopify", with the voice-over "In the
+real product this goes straight to their Shopify store through Arcade's plugin."
+
+Acceptance: every placeholder above is present, visibly marked as coming soon or disabled, and triggers no
+request.
+
 ## 1.3 References to imitate (function only)
 
 | Reference | What to copy functionally |
@@ -663,6 +684,22 @@ is offline and deterministic.
 | Mock | `python arcade/mock_arcade.py --selftest` | green incl. new PUT test |
 | E2E (mock) | `npm run e2e` (mock on 8787) | creator onboard -> suggest 3 -> fan (new uid) pack -> suggest 3 -> `GET /marketplace` has creator + fan items -> signed-out buy -> `stats.buys == 1` |
 | Live smoke | 2.10 step 5 | 1 real listed product with image and price |
+
+## 2.13b Shopify through the Arcade AI plugin (suggested design, not built)
+
+Placeholders only today (1.2b). How it would plug in after the hackathon:
+
+| Step | Suggestion |
+|---|---|
+| Connect | The creator installs Arcade's plugin in their Shopify store, which links their Arcade account. Our app stores only `creators/{id}.shopify = {shop, connected}` |
+| Publish | A listed piece (creator or fan) is published to the creator's store: title, images, description, a price = Arcade's `unitPrice` + the creator's markup. This should go **through the Arcade plugin** so Arcade knows the product and routes its orders; publishing directly with Shopify's own product API would leave orders unfulfilled |
+| Sell | Shopify checkout and payment; Arcade's plugin sends the order to the maker and syncs tracking back to Shopify |
+| Our marketplace | Becomes a view of what's in the store plus the fan pieces waiting to be published |
+
+**Questions for Arcade on the day:**
+1. Does the plugin take products from outside (an API or import), or only ones designed inside it?
+2. Can a fan's piece be published to the creator's store and still be routed to a maker?
+3. How is the creator's markup paid out, and what does Arcade keep?
 
 ## 2.14 Risks and fallbacks
 

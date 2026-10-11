@@ -62,6 +62,12 @@ and images to `marketplace/fixtures/fake_products/images/`. The format and rules
 safe to repeat). They appear in the feed next to the generated pieces with `fake: true`. Buying one gives a
 demo checkout without Arcade.
 
+## Shopify (Arcade AI plugin): placeholders only
+
+The real marketplace would run on the creator's Shopify store through Arcade's plugin for Shopify. For the
+hackathon it is **described, not built**: static placeholder elements in the UI (brief 1.2b) and a suggested design
+(brief 2.13b). No route calls Shopify, and the local marketplace above is what the demo uses.
+
 ## Still to build (from `BRIEF_MARKETPLACE.md`, Part 2)
 
 | Brief item | What it adds | Plugs into |
