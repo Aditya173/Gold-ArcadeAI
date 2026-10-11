@@ -139,7 +139,10 @@ success (summary card shown).
 | Creator name, handle | text inputs -> `name`, `handle` |
 | **Logos** upload (1–2 images) | file input -> `images[]` with `kind: "logo"` |
 | **Reference images** upload (1–4 images) | file input -> `images[]` with `kind: "reference"` |
-| **Instagram**: handle field (required, matches `^@?[A-Za-z0-9._]{1,30}$`) + "add images from your Instagram" upload (pick 1–4 saved posts) | `instagram` (text, stored and shown on the creator page); images -> `images[]` with `kind: "instagram"`. We do **not** fetch Instagram automatically today (no API access); the creator adds the images by hand. |
+| **Connect Instagram** action (business or creator account, via Meta's Instagram Login) | `GET /instagram/connect` -> open `authUrl`; Meta redirects to `GET /instagram/callback`; afterwards `GET /instagram/status` -> `{connected, username}` |
+| After connecting: grid of the account's recent image posts (carousel images flattened), pick 1–4 | `GET /instagram/media` -> `media[]`: `id`, `mediaUrl` (show as thumbnail), `permalink`, `timestamp`, `mediaType` (`IMAGE` only; videos are skipped) -> chosen IDs sent as `instagramMediaIds[]` |
+| Instagram handle (filled from the connected account; editable only when not connected) | `instagram` (text, shown on the creator page) |
+| Fallback when not connecting: "add images from your Instagram" upload (pick 1–4 saved posts) | images -> `images[]` with `kind: "instagram"` |
 | **Colour palette**: 2–6 colours, each a hex value, with add/remove | `palette[]` of `#rrggbb` (backend lowercases) |
 | Optional "style words" (up to 3, e.g. "hand-drawn, coastal") | `styleWords[]` -> added to every prompt |
 | List of every chosen image (local thumbnail) with its kind and a remove action | local |
@@ -148,9 +151,12 @@ success (summary card shown).
 | "Use demo brand" shortcut | sends `{fixture: "brand_wishbonekitchen"}` instead of uploads |
 | Create style action | `POST /creators/onboard` -> S4 |
 
-**User actions:** upload, set palette, enter Instagram handle, pick style images, submit.
+**User actions:** upload logos and references, set palette, connect Instagram and pick posts (or upload them),
+pick style images, submit.
 **States:** empty (submit disabled until name + handle + valid Instagram handle + at least 1 image + 2 colours);
-validation errors inline (too big, wrong type, bad hex, bad Instagram handle); loading (uploading); error (400/403
+validation errors inline (too big, wrong type, bad hex, bad Instagram handle); Instagram states: not connected,
+connecting, connected (grid), connect failed or not a business/creator account (show `error.message`, offer the
+upload fallback); loading (uploading); error (400/403
 with `error.message`; 403 = that handle is taken by another account); success -> S4.
 **Video:** the recorded creator **is Wishbone Kitchen** (see 1.2). Upload `logo.png` as a logo,
 `pattern-gingham.png` as a reference and `pattern-citrus.png` as an Instagram image (all from
@@ -302,7 +308,7 @@ marketplace isn't empty), then record the fan section.
 |---|---|---|---|
 | 0:00–0:10 | S1 | App, two role entry actions | "Creators and fans both start here." |
 | 0:10–0:30 | S2 (creator) | Connect Gold, pick **Small-Table Host**, "What Gold found" card | "Gold tells us what this person actually lives with. Demo uses a synthetic profile." |
-| 0:30–0:55 | S3 | Upload logo, reference, Instagram image; palette; Instagram handle | "The creator gives us their brand." |
+| 0:30–0:55 | S3 | Upload logo and reference; palette; **Connect Instagram** -> grid of recent posts -> pick 2 | "The creator gives us their brand, straight from their Instagram." |
 | 0:55–1:10 | S4 | Rows uploading, then all registered; "style ready" | "Arcade turns those into a style." |
 | 1:10–1:35 | S6 (creator) | 3 cards generating, then listed with images and prices. Open one listed card's `why` line, which quotes the same idea and % shown on the S2 "What Gold found" card (e.g. S2 shows "dinner table for four 40%", the reason says "dinner table for four shows up in 40% of your moments") | "We make products from their insights in their style." (cut the wait) |
 | 1:35–1:45 | S8 | Creator's products in the marketplace | "They're live for everyone." |
@@ -325,7 +331,7 @@ working key exists (Part 2, 2.10). Speed up generating waits; do not fake result
 | Shopify vendor / brand collection | a creator's own product list reached from a product |
 | Arcade Studio create flow (`studio.arcade.ai/create`) | reference-image upload list, palette, per-item generating states, results list |
 | A bank-account connect consent step (e.g. Plaid Link) | explain what is shared, explicit connect, success summary |
-| Instagram profile grid | creator picks a few of their posts as images |
+| Instagram profile grid / Meta "Continue with Instagram" consent | connect the account, then pick a few posts as images |
 
 ## 1.4 UI acceptance checklist
 
@@ -335,6 +341,8 @@ working key exists (Part 2, 2.10). Speed up generating waits; do not fake result
 - [ ] S2 lists exactly the 9 archetypes from `GET /packs`, labelled demo; the summary uses `reading.*` fields.
 - [ ] S3 enforces: name, handle, Instagram handle matching `^@?[A-Za-z0-9._]{1,30}$`, at least 1 image, 2–6 valid hex colours, 1 MB per image, 6 images max, at most 3 style images.
 - [ ] S3 captures the Instagram handle and Instagram images separately from logos and references.
+- [ ] S3 "Connect Instagram" shows the account's recent image posts and sends the chosen `instagramMediaIds[]`;
+      the upload fallback works when not connected.
 - [ ] With an Instagram image present, it is in the default `styleRefs`.
 - [ ] S4 shows per-image status and continues with partial success.
 - [ ] S5 shows Wishbone Kitchen before any typing; search filters by name and handle.
@@ -440,7 +448,11 @@ Base: `http://127.0.0.1:5001/demo-storefront/us-central1/api`. Errors stay `{"er
 | `GET /packs` | no | – | `{packs[]}` (existing) | none |
 | `POST /users/{uid}/insights` | own uid | `{pack, role}` | existing reading object; also writes `users/{uid}.role` | none |
 | `GET /users/{uid}/insights` | own uid | – | existing + `role`, `creatorId` (S0 restores the session from this after a reload) | none |
-| `POST /creators/onboard` **new** | yes | `{name, handle, instagram, palette:["#rrggbb"..], styleWords?:[], images:[{kind:"logo"\|"reference"\|"instagram", mediaType, dataBase64}], styleRefs?:[i,i,i]}` or `{fixture:"brand_wishbonekitchen"}`. `creatorId = 'creator-' + slug(handle)`; hex lowercased before validating; same `creatorId` owned by a different uid -> **403** (existing `createCreator` check) | `{creatorId, style:{images[]{kind,status,referenceId}, styleRefs[], palette[], styleWords[]}}` | per image: `references/createUpload` -> PUT `uploadUrl` -> `references/create` |
+| `POST /creators/onboard` **new** | yes | `{name, handle, instagram, palette:["#rrggbb"..], styleWords?:[], images:[{kind:"logo"\|"reference"\|"instagram", mediaType, dataBase64}], instagramMediaIds?:[id..≤4], styleRefs?:[i,i,i]}` (each Instagram media ID is fetched server-side from the connected account and added as `kind:"instagram"`) or `{fixture:"brand_wishbonekitchen"}`. `creatorId = 'creator-' + slug(handle)`; hex lowercased before validating; same `creatorId` owned by a different uid -> **403** (existing `createCreator` check) | `{creatorId, style:{images[]{kind,status,referenceId}, styleRefs[], palette[], styleWords[]}}` | per image: `references/createUpload` -> PUT `uploadUrl` -> `references/create` |
+| `GET /instagram/connect` **new** | yes | – | `{authUrl}`: Instagram Login URL with `scope=instagram_business_basic`, our `redirect_uri`, and `state` = a signed uid | none |
+| `GET /instagram/callback` **new** | via `state` | `?code=&state=` (from Meta) | exchanges `code` for a token, then a long-lived token; stores it at `users/{uid}/private/instagram` (server-only); redirects back to the app | Meta: token exchange |
+| `GET /instagram/status` **new** | yes | – | `{connected, username}` | Meta: `GET /me?fields=user_id,username` |
+| `GET /instagram/media` **new** | yes | `?limit=24` | `{media:[{id, mediaType, mediaUrl, permalink, timestamp}]}` images only; carousel `children` flattened | Meta: `GET /me/media?fields=id,media_type,media_url,permalink,timestamp,children{id,media_type,media_url}` |
 | `GET /creators` **new** | no | `?q=` | `{creators:[{creatorId,name,handle,instagram,palette,listedCount}]}` (Wishbone Kitchen first) | none |
 | `GET /creators/{id}` | no | – | existing + `name`, `handle`, `palette`, `styleWords`, `instagram` (and `styleThumbs[]` only if added later) | none |
 | `POST /suggest` **new** | yes | `{creatorId, count?=4}` (`count` takes the first N kit templates) | always **200** once every item is final: `{items:[{itemId,category,status,title,description,maker,imageUrl,price,why,reasons,reason}]}` (`reasons` owner-only, see 2.6) (up to ~2 min live). 404 no such creator; 409 no Gold reading attached | per item: `patterns/create` (+`categoryId`) -> `jobs/get` poll -> `products/get` |
@@ -505,6 +517,10 @@ or "not_makeable" (reason)
 1. Validate: name, handle, `instagram` matches `^@?[A-Za-z0-9._]{1,30}$`, 1–6 images, each
    `image/png|jpeg|webp|gif`, decoded size ≤ 1 MB (Arcade allows 10 MiB; our JSON body limit is the real cap),
    2–6 hex colours (lowercased first), `styleRefs` ≤ 3.
+1b. **Instagram images:** for each `instagramMediaIds[]` entry, re-read it from the connected account
+   (`GET /{media-id}?fields=media_type,media_url` with the stored token; IDs not owned by that account fail), skip
+   non-`IMAGE`, download `media_url` (it can expire, so fetch it now, never store it), check type and size, and add
+   it as `kind: "instagram"`. Downloaded bytes go straight to Arcade and are not kept.
 2. For each image: `references/createUpload {requestId: rid('ref', creatorId, sha256(bytes)) + '-u', mediaType,
    byteLength: decoded length}` -> PUT `uploadUrl` with `up.method` and exactly `up.requiredHeaders` (no
    `Authorization`) -> `references/create {requestId: rid('ref', creatorId, sha256(bytes)) + '-c', uploadId}` ->
@@ -518,7 +534,10 @@ or "not_makeable" (reason)
    them the same way.
 
 Not doing: real style training (Studio custom model is sales-led), `modelId` / `models/list` (optional in Arcade,
-the mock answers 501), per-image intent (Studio-only), Instagram fetching (no API access today).
+the mock answers 501), per-image intent (Studio-only). **Instagram is read only from the creator's own connected
+account** (Instagram API with Instagram Login, `instagram_business_basic`). We do not read other people's accounts:
+Meta's Business Discovery reads other public business accounts but doesn't document `media_url`, and their images
+aren't ours to turn into products.
 
 ## 2.8 Product creation sequences
 
@@ -635,10 +654,16 @@ is offline and deterministic.
 | `unitPrice` null | "Price on request"; the feed re-reads it on the next load (2.9). |
 | Function timeout on `/suggest` | timeout 540 s; items are written as `generating` first so polling still shows progress. |
 | Ring purchase | 409 guard in `marketplace.buy`. |
+| Meta app setup takes time (app, Instagram product, redirect URL, tester role) | Do it first (human, ~45 min). Until it works, S3 uses the upload fallback; the demo still shows "Connect Instagram" only if it works live. |
+| Meta app not reviewed | Development mode works for accounts added as **testers** on the Meta app. Only those accounts can connect today. |
+| The demo creator's real account | Only connects if they log in themselves. Otherwise connect a team-owned business/creator test account. Never download a creator's posts without their consent. |
+| `media_url` expires | Download at onboard time only; never store it. |
 
 ## 2.15 Build plan for today (ultracode work units)
 
-Order: **Wave 1** (U1, U2, U3 in parallel) -> **Wave 2** (U4, U5 in parallel) -> **Wave 3** (U6) -> **U7** (live).
+Order: **Wave 1** (U1, U2, U3 in parallel) -> **Wave 2** (U4, U4b, U5 in parallel) -> **Wave 3** (U6) -> **U7** (live).
+**Human step first thing today:** create the Meta app (Instagram API with Instagram Login), add the redirect URL,
+and add the demo Instagram business/creator account as a tester; put the app ID and secret in Functions secrets.
 
 **File ownership (no merge conflicts):** U2 owns `index.js` entirely. It removes the old routes and adds **every**
 new route from 2.4 in one change, each pointing at a named export (`style.onboard`, `marketplace.listCreators`,
@@ -652,6 +677,7 @@ U3 and U5 both edit `marketplace.js` but run in different waves. U4 and U5 build
 | **U2 Routes + rules** | ROUTES rewrite with 501 stubs, timeout 540, rules (delete stores/public, lock `users/{uid}` writes), matching test cases removed, rules test that the owner cannot write `users/{uid}` | `index.js`, `firestore.rules`, `test/rules.test.js`, `test/e2e.mjs` | `npm test` and `npm run test:rules` green; unbuilt new routes answer 501 |
 | **U3 Universal feed + search + buy** | `feed` (filters, sort, `mine` via one `getAll`, `stats.buys`), `listCreators` (`?q`, Wishbone Kitchen first, computed `listedCount`), `GET /creators/{id}` extra fields, new item fields, refresh rule (2.9), `buy` returns `checkoutId` + ring 409 | `src/marketplace.js` | unit tests: feed across 2 creators, filters, `mine`, search returns Wishbone Kitchen first, buying a ring -> 409 |
 | **U4 Creator onboarding (style)** | `style.onboard` (uploads + fixture path), form-creator kit (2.3 contract), `users/{uid}.role/creatorId`, `role`/`creatorId` in insights responses, 3 fixture PNGs | `src/style.js` (new), `flow.js` (attach/get insights only), `marketplace/fixtures/images/` | unit test with mock: 3 images -> 3 `referenceId`s, `styleRefs.length ≤ 3`, Instagram image in default `styleRefs`, bad hex / oversize / bad Instagram handle -> 400, handle owned by another uid -> 403; a form creator + the template planner gives 3 items that pass `checkItem` |
+| **U4b Instagram (Meta API)** | `src/instagram.js`: connect URL, callback (code -> token -> long-lived token, stored server-only), status, media list (images, carousels flattened), `fetchForOnboard(ids)` returning bytes; an **offline fake** (`INSTAGRAM_FAKE=1`) that serves 4 generated images so tests and the mock demo need no Meta account. Env: `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`, `INSTAGRAM_REDIRECT_URI` (Functions secrets, never committed) | `src/instagram.js` (new), routes via U2 stubs | unit tests with the fake: media list is images only, a carousel is flattened, onboard with 2 media IDs -> 2 `instagram` `referenceId`s, a foreign media ID -> 400, no token stored in any public doc; rules test: client cannot read `users/{uid}/private/instagram` |
 | **U5 Suggest** | `suggest`, `suggestions` (`getAll`), `maker` logic, stable `itemId` + `attempts` requestId, `generating` first, `allSettled` + per-item `not_makeable`, `makeItem` reads `priv.styleRefs` (≤3) for print; **`reasons[]` built in code (2.6)** stored owner-only and returned to the owner | `src/marketplace.js` | unit test: every listed item for `archetype-long-table-host` has 4 `reasons` whose `insight` text quotes the reading's exact %, and `reasons` never appear in `GET /marketplace`; creator caller -> `maker:"creator"`; fan caller -> `maker:"fan"`; jewelry sends no `referenceIds`/`colors`; a form creator's print item sends its `styleRefs`; rerun makes no duplicates; an item forced to fail with the mock fault header ends `not_makeable` and the other two are `listed` |
 | **U6 Seed + e2e + docs** | `scripts/seed.mjs` (2.11, incl. `--fans-only`), rewrite `test/e2e.mjs` to the 2.13 flow, update `API.md` | `backend/scripts`, `backend/test`, `backend/API.md` | `npm run e2e` PASS; `GET /marketplace` returns ≥ 5 items after seed |
 | **U7 Live switch** (human + 1 agent) | 2.10 live steps 1–6 | `.env.local` only | one live product listed with real image + price; no payment made |

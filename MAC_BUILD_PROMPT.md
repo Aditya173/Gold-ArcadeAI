@@ -63,7 +63,7 @@ python3 tools/leak_scan.py --install-hook
 
 Run the brief's build plan (Part 2 §2.15) as a workflow:
 - Wave 1: U1, U2 and U3 in parallel.
-- Wave 2: U4 and U5 in parallel.
+- Wave 2: U4, U4b (Instagram via Meta's API) and U5 in parallel.
 - Then U6.
 
 Respect the file-ownership rule in §2.15:
@@ -77,7 +77,13 @@ the brief and fix what it finds. Must-haves:
 - the owner-only `reasons[]` ("why we chose this", built in code);
 - the 3 generated placeholder images in `marketplace/fixtures/images/`, plus adding that folder to `ASSET_OK` in
   `tools/leak_scan.py`;
-- `scripts/seed.mjs` with `--fans-only`.
+- `scripts/seed.mjs` with `--fans-only`;
+- U4b's offline Instagram fake (`INSTAGRAM_FAKE=1`), so every test and the mock demo run without a Meta account.
+
+**Instagram (Meta API), human step:** before U4b goes live, I create the Meta app (Instagram API with Instagram
+Login), add the redirect URL and the demo business/creator account as a tester, and put `INSTAGRAM_APP_ID`,
+`INSTAGRAM_APP_SECRET` and `INSTAGRAM_REDIRECT_URI` in Functions secrets. Never commit them, and never read anyone's
+Instagram except the account that connected.
 
 **Done-check (all green, offline):**
 - `cd backend && npm test`
@@ -108,7 +114,10 @@ Build every screen in Part 1 with every element, data source, action and state l
   - the demo profile picker from `GET /packs` (9 archetypes);
   - the "What Gold found" card.
 - **S3** brand inputs:
-  - logo, reference and Instagram image pickers via `expo-image-picker`, sent as base64;
+  - logo and reference image pickers via `expo-image-picker`, sent as base64;
+  - **Connect Instagram**: open `authUrl` from `GET /instagram/connect` with `expo-web-browser` (auth session);
+    the backend callback redirects back to the app's deep link; then `GET /instagram/media` shows the post grid,
+    the creator picks 1–4, and they are sent as `instagramMediaIds[]`. Keep the upload fallback;
   - palette editor with hex validation;
   - Instagram handle regex;
   - style-image pick;
@@ -150,7 +159,8 @@ npx expo run:ios                      # builds with Xcode and launches in the Si
 1. Build with no errors.
 2. The app launches in the Simulator.
 3. Both flows run end to end against the local emulators and the mock:
-   - creator: S1 → S2 (Small-Table Host) → S3 (Use demo brand or the 3 fixture images) → S4 → S6 → S8;
+   - creator: S1 → S2 (Small-Table Host) → S3 (logo + reference, **Connect Instagram** with the fake or the test
+     account, pick 2 posts) → S4 → S6 → S8;
    - fan: sign out → S1 → S2 (Long-Table Host) → S5 (Wishbone Kitchen) → S6 (runner, plate, print, pendant,
      each with "Why we chose this") → S8 (the fan piece next to the creator's) → S7 → S9 (demo confirmation);
    - then signed out: Browse → S8 → S7 → Buy.
