@@ -54,6 +54,14 @@ Each comes back listed with a mock price, and the fan sees its private `why`. To
 JSON pack (ideas, shares, palette, places), then update the matching recorded items. The rule checks reject any
 "why" that quotes a share the pack doesn't have.
 
+## Demo-only images at the repo root (example creator)
+
+the four `IMG_….jpg` files and `INSTAGRAM 1.png`, `INSTAGRAM 2.png` (Instagram screenshots) and `napkin.png`,
+`pillow.png`, `placemat.png` (product images) are **for the demo video of the example creator, Wishbone Kitchen**:
+the creator's brand inputs and product visuals on camera. **The app doesn't load them**, and the user (fan) flow
+doesn't need them: a fan's pieces come from their Gold insight pack plus the creator's kit. Don't wire them into a
+route or the seed.
+
 ## Fake products (your partner fills the marketplace)
 
 Add listings to [`marketplace/fixtures/fake_products/products.json`](marketplace/fixtures/fake_products/products.json)
