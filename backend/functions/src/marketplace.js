@@ -211,14 +211,15 @@ async function buy(db, uid, data, { arc = arcade.client() } = {}) {
   const s = await m.get();
   if (!s.exists || s.data().status !== 'listed') fail('not-found', 'no such listed item');
   const it = s.data();
-  const co = await arc.call('checkouts/create', { requestId: arcade.rid('buy', uid, data.itemId, quantity, it.stats.buys),
+  // fake products (local simulation) were never made by Arcade: a demo checkout, no Arcade call
+  const co = it.fake ? { checkoutId: `demo-${data.itemId}-${it.stats.buys + 1}`, checkoutUrl: null, mock: true } : await arc.call('checkouts/create', { requestId: arcade.rid('buy', uid, data.itemId, quantity, it.stats.buys),
     lines: [{ productId: it.productId, quantity }], dropShip: quantity === 1 });
   const creatorOwner = ((await db.collection('creators').doc(it.creatorId).collection('private').doc('assets').get()).data() || {}).owner || null;
   const order = db.collection('orders').doc();
   await order.set({ buyer: uid, itemId: data.itemId, creatorId: it.creatorId, storeOwner: creatorOwner, productId: it.productId, quantity,
     checkoutId: co.checkoutId, checkoutUrl: co.checkoutUrl, mock: co.mock === true, status: 'checkout_created', createdAt: Date.now() });
   await m.update({ 'stats.buys': FieldValue.increment(1) });
-  return { orderId: order.id, checkoutUrl: co.checkoutUrl, mock: co.mock === true };
+  return { orderId: order.id, checkoutId: co.checkoutId, checkoutUrl: co.checkoutUrl, mock: co.mock === true, fake: it.fake === true };
 }
 
 module.exports = { validateKit, checkItem, templateFill, planItem, publicKit, userMsg, fixture, SYSTEM,

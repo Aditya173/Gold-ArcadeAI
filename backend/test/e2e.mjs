@@ -24,7 +24,7 @@ async function api(method, path, body, { token, status = 200 } = {}) {
 const denied = (p) => p.then(() => false, (e) => /permission/i.test(String(e.code || e.message)));
 
 const { packs } = await api('GET', '/packs');
-assert.strictEqual(packs.filter((p) => p.kind === 'archetype').length, 8);
+assert.strictEqual(packs.filter((p) => p.kind === 'archetype').length, 9);
 log(`packs: ${packs.length} (${packs.filter((p) => p.kind === 'archetype').length} archetypes)`);
 
 const owner = (await signInAnonymously(auth)).user;
