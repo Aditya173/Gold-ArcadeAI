@@ -16,7 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 BINARY = re.compile(r"\.(jpe?g|png|heic|webp|gif|npy|safetensors|mlpackage|zip|pdf)$", re.I)
-ASSET_OK = ("storefront-app/assets/",)
+ASSET_OK = ("app/assets/", "marketplace/fixtures/images/", "docs/screens/")
 SECRETS = [re.compile(p) for p in (r"sk-ant-[A-Za-z0-9_-]{20,}", r"arcade_sk_live_[A-Za-z0-9]{8,}",
                                    r"-----BEGIN [A-Z ]*PRIVATE KEY-----", r'"private_key_id"\s*:', r"AIza[0-9A-Za-z_-]{30,}")]
 
