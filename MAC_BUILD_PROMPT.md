@@ -39,12 +39,12 @@ Check and install what's missing (Homebrew where needed). Report versions.
   iPhone.
 - Node 20 LTS or newer, npm; `watchman`.
 - Java 17+ (needed by the Firebase emulators); `firebase-tools` (`npm i -g firebase-tools`).
-- Python 3.11+ with a venv at `.venv` and `pip install -r requirements.txt` (needs `jsonschema`, `pillow`).
+- Python 3.11+ with a venv at `venv` and `pip install -r requirements.txt` (needs `jsonschema`, `pillow`).
 - CocoaPods (Expo prebuild uses it).
 
 ```bash
 git clone https://github.com/Aditya173/Gold-ArcadeAI.git && cd Gold-ArcadeAI
-python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt
 python3 tools/leak_scan.py --install-hook
 ```
 
@@ -55,7 +55,7 @@ python3 tools/leak_scan.py --install-hook
 
 **Known Mac traps:**
 - The backend tests start the mock with the first `python` on `PATH`. Run them with the venv active, or set
-  `PYTHON=$PWD/.venv/bin/python`.
+  `PYTHON=$PWD/venv/bin/python`.
 - If the Functions emulator times out while loading, set `FUNCTIONS_DISCOVERY_TIMEOUT=60` (documented in
   `backend/README.md`).
 

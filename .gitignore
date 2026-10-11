@@ -8,3 +8,4 @@ dist/
 web-build/
 *-debug.log
 functions/.env.local
+venv/
